@@ -11,7 +11,7 @@ export default function Hero() {
       </p>
 
       <h1 className="font-serif text-5xl leading-none tracking-tight sm:text-6xl md:text-8xl">
-        Benjamin Humphrey
+        Benjamin
         <span className="my-4 block text-4xl italic md:text-6xl">&amp;</span>
         Chloe
       </h1>
