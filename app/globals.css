@@ -35,3 +35,87 @@ body {
 .animate-fade-in {
   animation: fade-in 1.4s ease-out both;
 }
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #f8f6f2;
+  color: #181818;
+  font-family: var(--font-sans), sans-serif;
+}
+
+.font-serif {
+  font-family: var(--font-serif), serif;
+}
+
+::selection {
+  background: #c9b38a;
+  color: #181818;
+}
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-up {
+  opacity: 0;
+  animation: reveal-up 1s ease-out forwards;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+.delay-600 {
+  animation-delay: 0.6s;
+}
+
+@keyframes gentle-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.gentle-float {
+  animation: gentle-float 2.4s ease-in-out infinite;
+}
+@keyframes count-change {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-count {
+  animation: count-change 0.35s ease-out both;
+}

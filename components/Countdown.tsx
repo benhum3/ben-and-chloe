@@ -19,36 +19,50 @@ function getTimeLeft() {
 
 export default function Countdown() {
   const [mounted, setMounted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
 
   useEffect(() => {
     setMounted(true);
-    setTimeLeft(getTimeLeft());
 
-    const timer = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
+    const timer = setInterval(() => {
+      setTimeLeft(getTimeLeft());
+    }, 1000);
+
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="mt-10 grid w-full max-w-xs grid-cols-2 gap-3 sm:max-w-xl md:mt-12 md:grid-cols-4 md:gap-4">
-      {[
-        ["Days", timeLeft.days],
-        ["Hours", timeLeft.hours],
-        ["Minutes", timeLeft.minutes],
-        ["Seconds", timeLeft.seconds],
-      ].map(([label, value]) => (
-        <div key={label} className="border border-neutral-300 px-4 py-4">
-          <div className="font-serif text-3xl">{mounted ? value : "--"}</div>
-          <div className="mt-1 text-[10px] uppercase tracking-[0.25em] text-neutral-500">
-            {label}
+    <div className="mt-14 w-full max-w-2xl">
+      <p className="mb-6 text-[10px] uppercase tracking-[0.35em] text-neutral-500">
+        Countdown to the celebration
+      </p>
+
+      <div className="grid grid-cols-4 border-y border-[#e6e2da] py-6">
+        {[
+          ["Days", timeLeft.days],
+          ["Hours", timeLeft.hours],
+          ["Minutes", timeLeft.minutes],
+          ["Seconds", timeLeft.seconds],
+        ].map(([label, value], index) => (
+          <div
+            key={label}
+            className={`px-2 text-center ${
+              index !== 3 ? "border-r border-[#e6e2da]" : ""
+            }`}
+          >
+            <div
+              key={String(value)}
+              className="animate-count font-serif text-3xl leading-none text-[#181818] sm:text-4xl md:text-5xl"
+            >
+              {mounted ? value : "--"}
+            </div>
+
+            <div className="mt-3 text-[9px] uppercase tracking-[0.25em] text-neutral-500 sm:text-[10px]">
+              {label}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
