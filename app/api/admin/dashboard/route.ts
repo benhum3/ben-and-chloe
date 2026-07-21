@@ -63,6 +63,10 @@ export async function GET() {
     const householdRows = households ?? [];
     const guestRows = guests ?? [];
 
+    const householdMap = new Map(
+      householdRows.map((household) => [household.id, household]),
+    );
+
     const attending = guestRows.filter(
       (guest) => guest.attending === true,
     ).length;
@@ -100,6 +104,43 @@ export async function GET() {
         };
       });
 
+    const guestsWithHouseholds = guestRows.map((guest) => {
+      const household = householdMap.get(guest.household_id);
+
+      return {
+        id: guest.id,
+        fullName: guest.full_name,
+        householdId: guest.household_id,
+        householdName: household?.invitation_name ?? "Unknown household",
+        attending: guest.attending,
+        dietaryRequirements: guest.dietary_requirements,
+        submittedAt: household?.submitted_at ?? null,
+      };
+    });
+
+    const songRequests = householdRows
+      .filter(
+        (household) =>
+          household.song_request &&
+          household.song_request.trim().length > 0,
+      )
+      .map((household) => ({
+        id: household.id,
+        invitationName: household.invitation_name,
+        songRequest: household.song_request,
+      }));
+
+    const messages = householdRows
+      .filter(
+        (household) =>
+          household.message && household.message.trim().length > 0,
+      )
+      .map((household) => ({
+        id: household.id,
+        invitationName: household.invitation_name,
+        message: household.message,
+      }));
+
     return NextResponse.json({
       stats: {
         totalGuests: guestRows.length,
@@ -112,6 +153,10 @@ export async function GET() {
           householdRows.length - householdsResponded,
       },
       latestResponses,
+      guests: guestsWithHouseholds,
+      songRequests,
+      messages,
+      generatedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error("Unexpected dashboard error:", error);

@@ -1,7 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import Monogram from "@/components/Monogram";
+
+type GuestStatus = "all" | "attending" | "declined" | "pending";
+
+type DashboardGuest = {
+  id: string;
+  fullName: string;
+  householdId: string;
+  householdName: string;
+  attending: boolean | null;
+  dietaryRequirements: string | null;
+  submittedAt: string | null;
+};
 
 type DashboardData = {
   stats: {
@@ -20,7 +33,37 @@ type DashboardData = {
     attending: number;
     declined: number;
   }>;
+  guests: DashboardGuest[];
+  songRequests: Array<{
+    id: string;
+    invitationName: string;
+    songRequest: string;
+  }>;
+  messages: Array<{
+    id: string;
+    invitationName: string;
+    message: string;
+  }>;
+  generatedAt: string;
 };
+
+function getGuestStatus(guest: DashboardGuest) {
+  if (guest.attending === true) {
+    return "Attending";
+  }
+
+  if (guest.attending === false) {
+    return "Declined";
+  }
+
+  return "Pending";
+}
+
+function escapeCsv(value: string | number | null) {
+  const text = value === null ? "" : String(value);
+
+  return `"${text.replaceAll('"', '""')}"`;
+}
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
@@ -32,6 +75,10 @@ export default function AdminPage() {
 
   const [loading, setLoading] = useState(false);
   const [dashboardError, setDashboardError] = useState("");
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<GuestStatus>("all");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,6 +125,82 @@ export default function AdminPage() {
 
     void loadDashboard();
   }, [unlocked]);
+
+  const filteredGuests = useMemo(() => {
+    if (!dashboardData) {
+      return [];
+    }
+
+    const normalisedSearch = searchTerm.trim().toLowerCase();
+
+    return dashboardData.guests.filter((guest) => {
+      const matchesSearch =
+        normalisedSearch.length === 0 ||
+        guest.fullName.toLowerCase().includes(normalisedSearch) ||
+        guest.householdName.toLowerCase().includes(normalisedSearch) ||
+        guest.dietaryRequirements
+          ?.toLowerCase()
+          .includes(normalisedSearch);
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "attending" &&
+          guest.attending === true) ||
+        (statusFilter === "declined" &&
+          guest.attending === false) ||
+        (statusFilter === "pending" &&
+          guest.attending === null);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [dashboardData, searchTerm, statusFilter]);
+
+  function exportGuests() {
+    if (!dashboardData) {
+      return;
+    }
+
+    const headings = [
+      "Guest",
+      "Household",
+      "Status",
+      "Dietary requirements",
+      "RSVP submitted",
+    ];
+
+    const rows = dashboardData.guests.map((guest) => [
+      guest.fullName,
+      guest.householdName,
+      getGuestStatus(guest),
+      guest.dietaryRequirements ?? "",
+      guest.submittedAt
+        ? new Date(guest.submittedAt).toLocaleString("en-GB")
+        : "",
+    ]);
+
+    const csv = [
+      headings.map(escapeCsv).join(","),
+      ...rows.map((row) => row.map(escapeCsv).join(",")),
+    ].join("\n");
+
+    const blob = new Blob([`\uFEFF${csv}`], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `wedding-guests-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
 
   if (!unlocked) {
     return (
@@ -139,8 +262,8 @@ export default function AdminPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#f8f6f2] px-6 py-20 text-[#181818] md:py-24">
-      <section className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-[#f8f6f2] px-5 py-16 text-[#181818] md:px-8 md:py-24">
+      <section className="mx-auto max-w-7xl">
         <div className="mb-16 flex flex-col items-center text-center">
           <Monogram />
 
@@ -153,8 +276,7 @@ export default function AdminPage() {
           </h1>
 
           <p className="mt-6 max-w-xl text-sm leading-8 text-neutral-600">
-            A private dashboard for tracking invitations, responses and guest
-            details.
+            Invitations, responses and guest information in one place.
           </p>
         </div>
 
@@ -172,13 +294,13 @@ export default function AdminPage() {
           </div>
         )}
 
-        {!loading && !dashboardError && (
+        {!loading && !dashboardError && dashboardData && (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {statisticCards.map(([label, value]) => (
                 <div
                   key={label}
-                  className="border border-[#e6e2da] bg-[#f8f6f2]/70 p-8 text-center"
+                  className="border border-[#e6e2da] bg-[#f8f6f2]/70 p-8 text-center transition duration-300 hover:-translate-y-1 hover:shadow-sm"
                 >
                   <p className="font-serif text-5xl">{value}</p>
 
@@ -189,8 +311,203 @@ export default function AdminPage() {
               ))}
             </div>
 
-            <div className="mt-16 border-t border-[#e6e2da] pt-10">
-              <div className="mb-8 flex items-end justify-between gap-6">
+            <div className="mt-16">
+              <div className="flex flex-col gap-6 border-b border-[#e6e2da] pb-8 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
+                    Guest List
+                  </p>
+
+                  <h2 className="mt-3 font-serif text-4xl">
+                    Manage responses
+                  </h2>
+
+                  <p className="mt-3 text-sm text-neutral-600">
+                    Showing {filteredGuests.length} of{" "}
+                    {dashboardData.guests.length} guests.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={exportGuests}
+                  className="border border-[#181818] px-6 py-4 text-xs uppercase tracking-[0.25em] transition hover:bg-[#181818] hover:text-[#f8f6f2]"
+                >
+                  Export CSV
+                </button>
+              </div>
+
+              <div className="grid gap-4 py-6 md:grid-cols-[1fr_auto]">
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) =>
+                    setSearchTerm(event.target.value)
+                  }
+                  placeholder="Search guest, household or dietary requirement"
+                  className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                />
+
+                <select
+                  value={statusFilter}
+                  onChange={(event) =>
+                    setStatusFilter(event.target.value as GuestStatus)
+                  }
+                  className="border border-[#e6e2da] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                >
+                  <option value="all">All statuses</option>
+                  <option value="attending">Attending</option>
+                  <option value="declined">Declined</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+
+              <div className="hidden overflow-x-auto border-y border-[#e6e2da] md:block">
+                <table className="w-full min-w-[850px] text-left">
+                  <thead>
+                    <tr className="border-b border-[#e6e2da] text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+                      <th className="px-4 py-5 font-normal">
+                        Guest
+                      </th>
+                      <th className="px-4 py-5 font-normal">
+                        Household
+                      </th>
+                      <th className="px-4 py-5 font-normal">
+                        Status
+                      </th>
+                      <th className="px-4 py-5 font-normal">
+                        Dietary requirements
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-[#e6e2da]">
+                    {filteredGuests.map((guest) => (
+                      <tr key={guest.id}>
+                        <td className="px-4 py-5">
+                          <p className="font-serif text-xl">
+                            {guest.fullName}
+                          </p>
+                        </td>
+
+                        <td className="px-4 py-5 text-sm text-neutral-600">
+                          {guest.householdName}
+                        </td>
+
+                        <td className="px-4 py-5">
+                          <StatusBadge attending={guest.attending} />
+                        </td>
+
+                        <td className="px-4 py-5 text-sm text-neutral-600">
+                          {guest.dietaryRequirements?.trim() ||
+                            "None provided"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="divide-y divide-[#e6e2da] border-y border-[#e6e2da] md:hidden">
+                {filteredGuests.map((guest) => (
+                  <article key={guest.id} className="py-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <p className="font-serif text-2xl">
+                        {guest.fullName}
+                      </p>
+
+                      <StatusBadge attending={guest.attending} />
+                    </div>
+
+                    <p className="mt-2 text-sm text-neutral-600">
+                      {guest.householdName}
+                    </p>
+
+                    <p className="mt-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
+                      Dietary requirements
+                    </p>
+
+                    <p className="mt-2 text-sm text-neutral-700">
+                      {guest.dietaryRequirements?.trim() ||
+                        "None provided"}
+                    </p>
+                  </article>
+                ))}
+              </div>
+
+              {filteredGuests.length === 0 && (
+                <div className="border-b border-[#e6e2da] py-12 text-center">
+                  <p className="text-sm text-neutral-600">
+                    No guests match that search.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-20 grid gap-12 lg:grid-cols-2">
+              <section>
+                <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
+                  Song Requests
+                </p>
+
+                <h2 className="mt-3 font-serif text-4xl">
+                  Dance floor suggestions
+                </h2>
+
+                <div className="mt-8 divide-y divide-[#e6e2da] border-y border-[#e6e2da]">
+                  {dashboardData.songRequests.length > 0 ? (
+                    dashboardData.songRequests.map((request) => (
+                      <article key={request.id} className="py-6">
+                        <p className="font-serif text-xl">
+                          {request.songRequest}
+                        </p>
+
+                        <p className="mt-2 text-xs uppercase tracking-[0.18em] text-neutral-500">
+                          {request.invitationName}
+                        </p>
+                      </article>
+                    ))
+                  ) : (
+                    <p className="py-8 text-sm text-neutral-600">
+                      No song requests yet.
+                    </p>
+                  )}
+                </div>
+              </section>
+
+              <section>
+                <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
+                  Guest Messages
+                </p>
+
+                <h2 className="mt-3 font-serif text-4xl">
+                  Notes from your guests
+                </h2>
+
+                <div className="mt-8 divide-y divide-[#e6e2da] border-y border-[#e6e2da]">
+                  {dashboardData.messages.length > 0 ? (
+                    dashboardData.messages.map((message) => (
+                      <article key={message.id} className="py-6">
+                        <p className="text-sm leading-7 text-neutral-700">
+                          “{message.message}”
+                        </p>
+
+                        <p className="mt-3 text-xs uppercase tracking-[0.18em] text-neutral-500">
+                          {message.invitationName}
+                        </p>
+                      </article>
+                    ))
+                  ) : (
+                    <p className="py-8 text-sm text-neutral-600">
+                      No guest messages yet.
+                    </p>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            <div className="mt-20 border-t border-[#e6e2da] pt-10">
+              <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
                     Latest Responses
@@ -201,13 +518,13 @@ export default function AdminPage() {
                   </p>
                 </div>
 
-                <p className="shrink-0 text-xs text-neutral-500">
+                <p className="text-xs text-neutral-500">
                   {stats?.householdsResponded ?? 0} of{" "}
                   {stats?.totalHouseholds ?? 0} households
                 </p>
               </div>
 
-              {dashboardData?.latestResponses.length ? (
+              {dashboardData.latestResponses.length > 0 ? (
                 <div className="divide-y divide-[#e6e2da] border-y border-[#e6e2da]">
                   {dashboardData.latestResponses.map((response) => (
                     <div
@@ -247,16 +564,54 @@ export default function AdminPage() {
                 </div>
               )}
             </div>
+
+            <div className="mt-12 flex flex-col gap-3 text-xs text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
+              <p>
+                Last updated{" "}
+                {new Intl.DateTimeFormat("en-GB", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                }).format(new Date(dashboardData.generatedAt))}
+              </p>
+
+              <a
+                href="/"
+                className="uppercase tracking-[0.25em] transition hover:text-[#181818]"
+              >
+                Return Home
+              </a>
+            </div>
           </>
         )}
-
-        <a
-          href="/"
-          className="mt-16 inline-block text-[10px] uppercase tracking-[0.3em] text-neutral-500 transition hover:text-[#181818]"
-        >
-          Return Home
-        </a>
       </section>
     </main>
+  );
+}
+
+function StatusBadge({
+  attending,
+}: {
+  attending: boolean | null;
+}) {
+  if (attending === true) {
+    return (
+      <span className="inline-flex whitespace-nowrap border border-green-700/30 bg-green-700/5 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-green-800">
+        Attending
+      </span>
+    );
+  }
+
+  if (attending === false) {
+    return (
+      <span className="inline-flex whitespace-nowrap border border-red-700/30 bg-red-700/5 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-red-800">
+        Declined
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex whitespace-nowrap border border-neutral-400/40 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+      Pending
+    </span>
   );
 }
