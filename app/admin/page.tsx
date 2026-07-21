@@ -1,14 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Monogram from "@/components/Monogram";
+
+type DashboardData = {
+  stats: {
+    totalGuests: number;
+    attending: number;
+    declined: number;
+    pending: number;
+    totalHouseholds: number;
+    householdsResponded: number;
+    householdsPending: number;
+  };
+  latestResponses: Array<{
+    id: string;
+    invitationName: string;
+    submittedAt: string;
+    attending: number;
+    declined: number;
+  }>;
+};
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [error, setError] = useState("");
 
-  function handleSubmit(event: React.FormEvent) {
+  const [dashboardData, setDashboardData] =
+    useState<DashboardData | null>(null);
+
+  const [loading, setLoading] = useState(false);
+  const [dashboardError, setDashboardError] = useState("");
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
@@ -18,6 +43,41 @@ export default function AdminPage() {
       setError("Incorrect password.");
     }
   }
+
+  useEffect(() => {
+    if (!unlocked) {
+      return;
+    }
+
+    async function loadDashboard() {
+      setLoading(true);
+      setDashboardError("");
+
+      try {
+        const response = await fetch("/api/admin/dashboard", {
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error ?? "Unable to load dashboard.");
+        }
+
+        setDashboardData(data);
+      } catch (loadError) {
+        setDashboardError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Unable to load dashboard.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    void loadDashboard();
+  }, [unlocked]);
 
   if (!unlocked) {
     return (
@@ -38,7 +98,7 @@ export default function AdminPage() {
               type="password"
               placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(event) => setPassword(event.target.value)}
               className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-center text-sm outline-none transition focus:border-[#A97A3D]"
             />
 
@@ -67,9 +127,20 @@ export default function AdminPage() {
     );
   }
 
+  const stats = dashboardData?.stats;
+
+  const statisticCards = [
+    ["Guests Invited", stats?.totalGuests ?? "—"],
+    ["Attending", stats?.attending ?? "—"],
+    ["Declined", stats?.declined ?? "—"],
+    ["Guests Pending", stats?.pending ?? "—"],
+    ["Households Replied", stats?.householdsResponded ?? "—"],
+    ["Households Pending", stats?.householdsPending ?? "—"],
+  ];
+
   return (
-    <main className="min-h-screen bg-[#f8f6f2] px-6 py-24 text-[#181818]">
-      <section className="mx-auto max-w-5xl">
+    <main className="min-h-screen bg-[#f8f6f2] px-6 py-20 text-[#181818] md:py-24">
+      <section className="mx-auto max-w-6xl">
         <div className="mb-16 flex flex-col items-center text-center">
           <Monogram />
 
@@ -87,33 +158,97 @@ export default function AdminPage() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            ["Invited", "70"],
-            ["Responded", "0"],
-            ["Awaiting Reply", "70"],
-          ].map(([label, value]) => (
-            <div
-              key={label}
-              className="border border-[#e6e2da] bg-[#f8f6f2]/70 p-8 text-center"
-            >
-              <p className="font-serif text-5xl">{value}</p>
-              <p className="mt-4 text-xs uppercase tracking-[0.3em] text-neutral-500">
-                {label}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-16 border-t border-[#e6e2da] pt-10">
-          <p className="mb-6 text-xs uppercase tracking-[0.35em] text-neutral-500">
-            Latest Responses
-          </p>
-
-          <div className="space-y-4 text-sm text-neutral-600">
-            <p>No responses yet.</p>
+        {loading && (
+          <div className="border border-[#e6e2da] px-6 py-12 text-center">
+            <p className="text-xs uppercase tracking-[0.3em] text-neutral-500">
+              Loading responses
+            </p>
           </div>
-        </div>
+        )}
+
+        {dashboardError && (
+          <div className="border border-red-200 px-6 py-8 text-center">
+            <p className="text-sm text-red-700">{dashboardError}</p>
+          </div>
+        )}
+
+        {!loading && !dashboardError && (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {statisticCards.map(([label, value]) => (
+                <div
+                  key={label}
+                  className="border border-[#e6e2da] bg-[#f8f6f2]/70 p-8 text-center"
+                >
+                  <p className="font-serif text-5xl">{value}</p>
+
+                  <p className="mt-4 text-xs uppercase tracking-[0.25em] text-neutral-500">
+                    {label}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-16 border-t border-[#e6e2da] pt-10">
+              <div className="mb-8 flex items-end justify-between gap-6">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
+                    Latest Responses
+                  </p>
+
+                  <p className="mt-3 text-sm text-neutral-600">
+                    Most recently submitted household RSVPs.
+                  </p>
+                </div>
+
+                <p className="shrink-0 text-xs text-neutral-500">
+                  {stats?.householdsResponded ?? 0} of{" "}
+                  {stats?.totalHouseholds ?? 0} households
+                </p>
+              </div>
+
+              {dashboardData?.latestResponses.length ? (
+                <div className="divide-y divide-[#e6e2da] border-y border-[#e6e2da]">
+                  {dashboardData.latestResponses.map((response) => (
+                    <div
+                      key={response.id}
+                      className="flex flex-col gap-3 py-6 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div>
+                        <p className="font-serif text-2xl">
+                          {response.invitationName}
+                        </p>
+
+                        <p className="mt-1 text-xs text-neutral-500">
+                          {new Intl.DateTimeFormat("en-GB", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(response.submittedAt))}
+                        </p>
+                      </div>
+
+                      <div className="flex gap-5 text-xs uppercase tracking-[0.18em]">
+                        <span className="text-neutral-700">
+                          {response.attending} attending
+                        </span>
+
+                        <span className="text-neutral-500">
+                          {response.declined} declined
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="border-y border-[#e6e2da] py-10">
+                  <p className="text-sm text-neutral-600">
+                    No responses received yet.
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         <a
           href="/"
