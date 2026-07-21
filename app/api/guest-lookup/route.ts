@@ -1,49 +1,54 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
-export async function POST(request: NextRequest) {
+type LookupRequest = {
+  name?: unknown;
+};
+
+export async function POST(request: Request) {
   try {
-    const { name } = await request.json();
+    const body = (await request.json()) as LookupRequest;
 
-    const trimmedName = name?.trim();
-
-    if (!trimmedName) {
+    if (typeof body.name !== "string" || !body.name.trim()) {
       return NextResponse.json(
-        { error: "Please enter your name." },
+        { error: "Please enter the name shown on your invitation." },
         { status: 400 },
       );
     }
 
-    const { data: guest, error: guestError } = await supabaseAdmin
-      .from("guests")
-      .select(
-        `
-          id,
-          full_name,
-          household_id,
-          households (
-            id,
-            invitation_name
-          )
-        `,
-      )
-      .ilike("full_name", trimmedName)
-      .single();
+    const searchName = body.name.trim().toLowerCase();
 
-    if (guestError || !guest) {
+    const { data: household, error: householdError } =
+      await supabaseAdmin
+        .from("households")
+        .select(
+          `
+            id,
+            invitation_name,
+            song_request,
+            message,
+            submitted_at
+          `,
+        )
+      .ilike("search_name", `%${searchName}%`)
+        .maybeSingle();
+
+    if (householdError) {
+      console.error("Household lookup failed:", householdError);
+
       return NextResponse.json(
-        { error: "Invitation not found." },
-        { status: 404 },
+        { error: "We could not check your invitation. Please try again." },
+        { status: 500 },
       );
     }
 
-    const household = Array.isArray(guest.households)
-      ? guest.households[0]
-      : guest.households;
-
     if (!household) {
       return NextResponse.json(
-        { error: "Invitation details could not be found." },
+        {
+          error:
+            "We could not find an invitation under that name. Please check the spelling and try again.",
+        },
         { status: 404 },
       );
     }
@@ -61,30 +66,27 @@ export async function POST(request: NextRequest) {
           updated_at
         `,
       )
-      .eq("household_id", guest.household_id)
+      .eq("household_id", household.id)
       .order("created_at", { ascending: true });
 
     if (guestsError) {
-      console.error("Household guest lookup failed:", guestsError);
+      console.error("Guest lookup failed:", guestsError);
 
       return NextResponse.json(
-        { error: "We could not load the invitation guests." },
+        { error: "We could not load your invitation. Please try again." },
         { status: 500 },
       );
     }
 
     return NextResponse.json({
-      household: {
-        id: household.id,
-        invitation_name: household.invitation_name,
-      },
+      household,
       guests: guests ?? [],
     });
   } catch (error) {
-    console.error("Guest lookup failed:", error);
+    console.error("Unexpected guest lookup error:", error);
 
     return NextResponse.json(
-      { error: "Something went wrong." },
+      { error: "We could not check your invitation. Please try again." },
       { status: 500 },
     );
   }
