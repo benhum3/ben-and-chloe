@@ -463,7 +463,7 @@ export default function AdminPage() {
 
         <nav
           aria-label="Dashboard sections"
-          className="sticky top-3 z-40 mx-auto mb-12 flex w-fit max-w-full flex-wrap justify-center gap-x-5 gap-y-2 rounded-full border border-[#ded9cf]/80 bg-[#f8f6f2]/90 px-5 py-3 text-[9px] uppercase tracking-[0.2em] text-neutral-500 shadow-[0_8px_30px_rgba(24,24,24,0.06)] backdrop-blur-md md:gap-x-7 md:px-7 md:text-[10px] md:tracking-[0.24em]"
+          className="sticky top-[calc(env(safe-area-inset-top)+0.75rem)] z-40 mx-auto mb-12 flex w-fit max-w-full flex-wrap justify-center gap-x-5 gap-y-2 rounded-full border border-[#ded9cf]/80 bg-[#f8f6f2]/90 px-5 py-3 text-[9px] uppercase tracking-[0.2em] text-neutral-500 shadow-[0_8px_30px_rgba(24,24,24,0.06)] backdrop-blur-md md:top-3 md:gap-x-7 md:px-7 md:text-[10px] md:tracking-[0.24em]"
         >
           <a href="#overview" className="transition hover:text-[#A97A3D]">Overview</a>
           <a href="#planning" className="transition hover:text-[#A97A3D]">Planning</a>
