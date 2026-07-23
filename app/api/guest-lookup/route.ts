@@ -26,6 +26,7 @@ export async function POST(request: Request) {
           `
             id,
             invitation_name,
+            invitation_type,
             song_request,
             message,
             submitted_at

@@ -6,12 +6,14 @@ import Link from "next/link";
 import Monogram from "@/components/Monogram";
 
 type GuestStatus = "all" | "attending" | "declined" | "pending";
+type InvitationType = "day" | "evening";
 
 type DashboardGuest = {
   id: string;
   fullName: string;
   householdId: string;
   householdName: string;
+  invitationType: InvitationType;
   attending: boolean | null;
   dietaryRequirements: string | null;
   submittedAt: string | null;
@@ -24,12 +26,15 @@ type DashboardData = {
     declined: number;
     pending: number;
     totalHouseholds: number;
+    dayHouseholds: number;
+    eveningHouseholds: number;
     householdsResponded: number;
     householdsPending: number;
   };
   latestResponses: Array<{
     id: string;
     invitationName: string;
+    invitationType: InvitationType;
     submittedAt: string;
     attending: number;
     declined: number;
@@ -164,6 +169,7 @@ export default function AdminPage() {
     const headings = [
       "Guest",
       "Household",
+      "Invitation type",
       "Status",
       "Dietary requirements",
       "RSVP submitted",
@@ -172,6 +178,7 @@ export default function AdminPage() {
     const rows = dashboardData.guests.map((guest) => [
       guest.fullName,
       guest.householdName,
+      guest.invitationType === "day" ? "Day" : "Evening",
       getGuestStatus(guest),
       guest.dietaryRequirements ?? "",
       guest.submittedAt
@@ -258,6 +265,8 @@ export default function AdminPage() {
     ["Attending", stats?.attending ?? "—"],
     ["Declined", stats?.declined ?? "—"],
     ["Guests Pending", stats?.pending ?? "—"],
+    ["Day Households", stats?.dayHouseholds ?? "—"],
+    ["Evening Households", stats?.eveningHouseholds ?? "—"],
     ["Households Replied", stats?.householdsResponded ?? "—"],
     ["Households Pending", stats?.householdsPending ?? "—"],
   ];
@@ -374,6 +383,9 @@ export default function AdminPage() {
                         Household
                       </th>
                       <th className="px-4 py-5 font-normal">
+                        Invitation
+                      </th>
+                      <th className="px-4 py-5 font-normal">
                         Status
                       </th>
                       <th className="px-4 py-5 font-normal">
@@ -393,6 +405,10 @@ export default function AdminPage() {
 
                         <td className="px-4 py-5 text-sm text-neutral-600">
                           {guest.householdName}
+                        </td>
+
+                        <td className="px-4 py-5">
+                          <InvitationTypeBadge type={guest.invitationType} />
                         </td>
 
                         <td className="px-4 py-5">
@@ -423,6 +439,10 @@ export default function AdminPage() {
                     <p className="mt-2 text-sm text-neutral-600">
                       {guest.householdName}
                     </p>
+
+                    <div className="mt-3">
+                      <InvitationTypeBadge type={guest.invitationType} />
+                    </div>
 
                     <p className="mt-4 text-xs uppercase tracking-[0.2em] text-neutral-500">
                       Dietary requirements
@@ -537,6 +557,10 @@ export default function AdminPage() {
                           {response.invitationName}
                         </p>
 
+                        <div className="mt-2">
+                          <InvitationTypeBadge type={response.invitationType} />
+                        </div>
+
                         <p className="mt-1 text-xs text-neutral-500">
                           {new Intl.DateTimeFormat("en-GB", {
                             dateStyle: "medium",
@@ -613,6 +637,14 @@ function StatusBadge({
   return (
     <span className="inline-flex whitespace-nowrap border border-neutral-400/40 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-neutral-500">
       Pending
+    </span>
+  );
+}
+
+function InvitationTypeBadge({ type }: { type: InvitationType }) {
+  return (
+    <span className="inline-flex whitespace-nowrap border border-[#A97A3D]/35 bg-[#A97A3D]/5 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[#8A642F]">
+      {type === "day" ? "Day Guest" : "Evening Guest"}
     </span>
   );
 }

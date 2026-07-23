@@ -1,4 +1,5 @@
 export type Step = "welcome" | "lookup" | "response" | "details" | "thanks";
+export type InvitationType = "day" | "evening";
 
 export type Guest = {
   id: string;
@@ -13,6 +14,7 @@ export type Guest = {
 export type Household = {
   id: string;
   invitation_name: string;
+  invitation_type: InvitationType;
   song_request: string | null;
   message: string | null;
   submitted_at: string | null;

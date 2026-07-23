@@ -6,6 +6,7 @@ type LookupStepProps = {
   isLoading: boolean;
   onNameChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onBack: () => void;
 };
 
 export default function LookupStep({
@@ -14,6 +15,7 @@ export default function LookupStep({
   isLoading,
   onNameChange,
   onSubmit,
+  onBack,
 }: LookupStepProps) {
   return (
     <>
@@ -43,11 +45,17 @@ export default function LookupStep({
           placeholder="Benjamin Humphrey"
           autoComplete="name"
           disabled={isLoading}
-          className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-center font-serif text-lg outline-none transition placeholder:text-neutral-400 focus:border-[#A97A3D] disabled:cursor-not-allowed disabled:opacity-60"
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? "guest-name-error" : undefined}
+          className="rsvp-control w-full border border-[#e6e2da] bg-white/20 px-5 py-4 text-center font-serif text-lg outline-none placeholder:text-neutral-400 disabled:cursor-not-allowed disabled:opacity-60"
         />
 
         {error && (
-          <p role="alert" className="mt-4 text-sm leading-6 text-red-700">
+          <p
+            id="guest-name-error"
+            role="alert"
+            className="mt-4 text-sm leading-6 text-red-700"
+          >
             {error}
           </p>
         )}
@@ -55,9 +63,18 @@ export default function LookupStep({
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-5 w-full border border-[#181818] px-6 py-4 text-xs uppercase tracking-[0.3em] transition hover:bg-[#181818] hover:text-[#f8f6f2] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rsvp-action mt-5 w-full rounded-full border border-[#A97A3D] bg-[#A97A3D] px-6 py-4 text-xs uppercase tracking-[0.3em] text-white hover:bg-transparent hover:text-[#A97A3D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A97A3D] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLoading ? "Finding Invitation..." : "Find My Invitation"}
+        </button>
+
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={isLoading}
+          className="mt-6 text-[10px] uppercase tracking-[0.25em] text-neutral-500 transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D] disabled:opacity-50"
+        >
+          Back
         </button>
       </form>
     </>

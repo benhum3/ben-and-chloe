@@ -21,7 +21,7 @@ export default function WelcomeStep({ onContinue }: WelcomeStepProps) {
       <button
         type="button"
         onClick={onContinue}
-        className="mt-12 border border-[#181818] px-8 py-4 text-xs uppercase tracking-[0.3em] transition hover:bg-[#181818] hover:text-[#f8f6f2]"
+        className="rsvp-action mt-12 rounded-full border border-[#A97A3D] bg-[#A97A3D] px-9 py-4 text-xs uppercase tracking-[0.3em] text-white hover:bg-transparent hover:text-[#A97A3D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A97A3D] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2]"
       >
         Continue
       </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 import DetailsStep from "@/components/rsvp/DetailsStep";
 import LookupStep from "@/components/rsvp/LookupStep";
@@ -29,6 +29,27 @@ export default function RSVPPage() {
   const [isLookingUp, setIsLookingUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [wasUpdate, setWasUpdate] = useState(false);
+  const stepContentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (step === "welcome") return;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+
+    const focusTimer = window.setTimeout(
+      () => stepContentRef.current?.focus(),
+      prefersReducedMotion ? 0 : 180,
+    );
+
+    return () => window.clearTimeout(focusTimer);
+  }, [step]);
 
   async function handleLookup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -226,16 +247,74 @@ export default function RSVPPage() {
     guestAnswers.length > 0 &&
     guestAnswers.every((guest) => guest.attending === false);
 
-  return (
-    <main className="min-h-screen bg-[#f8f6f2] px-6 py-24 text-[#181818]">
-      <section className="mx-auto flex min-h-[80vh] max-w-2xl flex-col items-center justify-center text-center">
-        <Monogram />
+  const journeySteps: Step[] = ["lookup", "response", "details"];
+  const currentJourneyStep = journeySteps.indexOf(step);
+  const showProgress = currentJourneyStep >= 0;
 
-        {step === "welcome" && (
-          <WelcomeStep onContinue={() => setStep("lookup")} />
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-[#f8f6f2] px-6 py-20 text-[#181818] md:py-24">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-12 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full border border-[#A97A3D]/10 md:h-[46rem] md:w-[46rem]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-36 h-[22rem] w-[22rem] -translate-x-1/2 rounded-full border border-[#A97A3D]/10 md:h-[32rem] md:w-[32rem]"
+      />
+
+      <section className="relative z-10 mx-auto flex min-h-[80vh] max-w-2xl flex-col items-center justify-center text-center">
+        <div className="rsvp-monogram-enter">
+          <Monogram />
+        </div>
+
+        {showProgress && (
+          <div
+            className="mb-10 mt-1 flex items-center"
+            role="progressbar"
+            aria-label={`RSVP step ${currentJourneyStep + 1} of ${journeySteps.length}`}
+            aria-valuemin={1}
+            aria-valuemax={journeySteps.length}
+            aria-valuenow={currentJourneyStep + 1}
+          >
+            {journeySteps.map((journeyStep, index) => (
+              <div key={journeyStep} className="flex items-center">
+                {index > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className={`h-px w-12 transition-colors duration-500 sm:w-16 ${
+                      index <= currentJourneyStep
+                        ? "bg-[#A97A3D]"
+                        : "bg-[#ded9cf]"
+                    }`}
+                  />
+                )}
+                <span
+                  aria-hidden="true"
+                  className={`h-2.5 w-2.5 rotate-45 border transition-all duration-500 ${
+                    index <= currentJourneyStep
+                      ? "border-[#A97A3D] bg-[#A97A3D]"
+                      : "border-[#cfc8bb] bg-[#f8f6f2]"
+                  }`}
+                />
+              </div>
+            ))}
+          </div>
         )}
 
-        {step === "lookup" && (
+        <div
+          key={step}
+          ref={stepContentRef}
+          tabIndex={-1}
+          role="region"
+          aria-label="RSVP form"
+          aria-live="polite"
+          className="rsvp-step-enter flex w-full flex-col items-center focus:outline-none"
+        >
+          {step === "welcome" && (
+            <WelcomeStep onContinue={() => setStep("lookup")} />
+          )}
+
+          {step === "lookup" && (
           <LookupStep
             name={name}
             error={lookupError}
@@ -245,10 +324,14 @@ export default function RSVPPage() {
               if (lookupError) setLookupError("");
             }}
             onSubmit={handleLookup}
+            onBack={() => {
+              setLookupError("");
+              setStep("welcome");
+            }}
           />
-        )}
+          )}
 
-        {step === "response" && household && (
+          {step === "response" && household && (
           <ResponseStep
             household={household}
             guests={guestAnswers}
@@ -257,9 +340,9 @@ export default function RSVPPage() {
             onContinue={continueToDetails}
             onReset={resetLookup}
           />
-        )}
+          )}
 
-        {step === "details" && household && (
+          {step === "details" && household && (
           <DetailsStep
             household={household}
             attendingGuests={attendingGuests}
@@ -277,18 +360,20 @@ export default function RSVPPage() {
               setStep("response");
             }}
           />
-        )}
+          )}
 
-        {step === "thanks" && (
+          {step === "thanks" && (
           <ThankYouStep
             nobodyAttending={nobodyAttending}
             wasUpdate={wasUpdate}
+            invitationType={household?.invitation_type ?? "day"}
           />
-        )}
+          )}
+        </div>
 
         <Link
           href="/"
-          className="mt-14 text-[10px] uppercase tracking-[0.3em] text-neutral-500 transition hover:text-[#181818]"
+          className="mt-14 text-[10px] uppercase tracking-[0.3em] text-neutral-500 transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
         >
           Return Home
         </Link>

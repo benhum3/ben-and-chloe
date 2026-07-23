@@ -33,8 +33,22 @@ export default function ResponseStep({
         {household.invitation_name}
       </p>
 
-      <p className="mt-5 max-w-lg text-sm leading-7 text-neutral-600">
-        Please select a response for each guest named on the invitation.
+      <div className="mt-6 w-full max-w-lg border-y border-[#e6e2da] py-5">
+        <p className="text-[10px] uppercase tracking-[0.3em] text-[#A97A3D]">
+          {household.invitation_type === "day"
+            ? "Day Invitation"
+            : "Evening Invitation"}
+        </p>
+
+        <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-neutral-600">
+          {household.invitation_type === "day"
+            ? "We’re delighted to invite you to join us for the full celebration, beginning at St Andrew’s Church from 12:00pm."
+            : "We’re delighted to invite you to join our evening celebration at Longridge House from 7:00pm."}
+        </p>
+      </div>
+
+      <p className="mt-6 max-w-lg text-sm leading-7 text-neutral-600">
+        Please select a response for each guest named on this invitation.
       </p>
 
       {household.submitted_at && (
@@ -63,7 +77,7 @@ export default function ResponseStep({
         <button
           type="button"
           onClick={onContinue}
-          className="border border-[#181818] px-6 py-4 text-xs uppercase tracking-[0.3em] transition hover:bg-[#181818] hover:text-[#f8f6f2]"
+          className="rsvp-action rounded-full border border-[#A97A3D] bg-[#A97A3D] px-6 py-4 text-xs uppercase tracking-[0.3em] text-white hover:bg-transparent hover:text-[#A97A3D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A97A3D] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2]"
         >
           Continue
         </button>
@@ -71,7 +85,7 @@ export default function ResponseStep({
         <button
           type="button"
           onClick={onReset}
-          className="text-[10px] uppercase tracking-[0.25em] text-neutral-500 transition hover:text-[#181818]"
+          className="text-[10px] uppercase tracking-[0.25em] text-neutral-500 transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
         >
           This Is Not My Invitation
         </button>

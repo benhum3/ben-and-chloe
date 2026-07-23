@@ -40,7 +40,11 @@ export default function DetailsStep({
       </p>
 
       <h1 className="font-serif text-5xl leading-none md:text-7xl">
-        {nobodyAttending ? "Before You Go" : "Before The Day"}
+        {nobodyAttending
+          ? "Before You Go"
+          : household.invitation_type === "day"
+            ? "Before The Day"
+            : "Before The Evening"}
       </h1>
 
       {nobodyAttending ? (
@@ -70,7 +74,7 @@ export default function DetailsStep({
                 onDietaryChange(guest.id, event.target.value)
               }
               placeholder="Please let us know of any allergies or dietary requirements. Leave blank if none."
-              className="min-h-28 w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-sm leading-7 outline-none transition focus:border-[#A97A3D]"
+              className="rsvp-control min-h-28 w-full border border-[#e6e2da] bg-white/20 px-5 py-4 text-sm leading-7 outline-none"
             />
           </label>
         ))}
@@ -86,7 +90,7 @@ export default function DetailsStep({
               value={songRequest}
               onChange={(event) => onSongRequestChange(event.target.value)}
               placeholder="What song will get you on the dance floor?"
-              className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+              className="rsvp-control w-full border border-[#e6e2da] bg-white/20 px-5 py-4 text-sm outline-none"
             />
           </label>
         )}
@@ -100,7 +104,7 @@ export default function DetailsStep({
             value={message}
             onChange={(event) => onMessageChange(event.target.value)}
             placeholder="Anything else you'd like us to know?"
-            className="min-h-28 w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-sm leading-7 outline-none transition focus:border-[#A97A3D]"
+            className="rsvp-control min-h-28 w-full border border-[#e6e2da] bg-white/20 px-5 py-4 text-sm leading-7 outline-none"
           />
         </label>
 
@@ -116,7 +120,7 @@ export default function DetailsStep({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full border border-[#181818] px-6 py-4 text-xs uppercase tracking-[0.3em] transition hover:bg-[#181818] hover:text-[#f8f6f2] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rsvp-action w-full rounded-full border border-[#A97A3D] bg-[#A97A3D] px-6 py-4 text-xs uppercase tracking-[0.3em] text-white hover:bg-transparent hover:text-[#A97A3D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A97A3D] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting
             ? isUpdate
@@ -131,7 +135,7 @@ export default function DetailsStep({
           type="button"
           onClick={onBack}
           disabled={isSubmitting}
-          className="w-full text-center text-[10px] uppercase tracking-[0.25em] text-neutral-500 transition hover:text-[#181818] disabled:opacity-50"
+          className="w-full text-center text-[10px] uppercase tracking-[0.25em] text-neutral-500 transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D] disabled:opacity-50"
         >
           Back To Guest Responses
         </button>

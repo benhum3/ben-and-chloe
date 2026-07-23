@@ -16,6 +16,7 @@ export async function GET() {
           `
             id,
             invitation_name,
+            invitation_type,
             song_request,
             message,
             submitted_at,
@@ -94,6 +95,7 @@ export async function GET() {
         return {
           id: household.id,
           invitationName: household.invitation_name,
+          invitationType: household.invitation_type,
           submittedAt: household.submitted_at,
           attending: householdGuests.filter(
             (guest) => guest.attending === true,
@@ -112,6 +114,7 @@ export async function GET() {
         fullName: guest.full_name,
         householdId: guest.household_id,
         householdName: household?.invitation_name ?? "Unknown household",
+        invitationType: household?.invitation_type ?? "day",
         attending: guest.attending,
         dietaryRequirements: guest.dietary_requirements,
         submittedAt: household?.submitted_at ?? null,
@@ -148,6 +151,12 @@ export async function GET() {
         declined,
         pending,
         totalHouseholds: householdRows.length,
+        dayHouseholds: householdRows.filter(
+          (household) => household.invitation_type === "day",
+        ).length,
+        eveningHouseholds: householdRows.filter(
+          (household) => household.invitation_type === "evening",
+        ).length,
         householdsResponded,
         householdsPending:
           householdRows.length - householdsResponded,
