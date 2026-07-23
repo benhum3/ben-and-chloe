@@ -16,6 +16,9 @@ type UpdateGuest = {
   fullName: string;
 };
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 async function requireAdmin() {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json(
@@ -143,12 +146,17 @@ export async function PATCH(request: Request) {
 
   if (
     !id ||
+    !UUID_PATTERN.test(id) ||
     !invitationName ||
     invitationName.length > 160 ||
     (invitationType !== "day" && invitationType !== "evening") ||
     guests.length === 0 ||
+    guests.length > 20 ||
     guests.some(
-      (guest) => !guest.fullName || guest.fullName.length > 160,
+      (guest) =>
+        !guest.fullName ||
+        guest.fullName.length > 160 ||
+        Boolean(guest.id && !UUID_PATTERN.test(guest.id)),
     )
   ) {
     return NextResponse.json(
@@ -178,7 +186,10 @@ export async function DELETE(request: Request) {
 
   const body = (await request.json()) as { householdId?: unknown };
 
-  if (typeof body.householdId !== "string") {
+  if (
+    typeof body.householdId !== "string" ||
+    !UUID_PATTERN.test(body.householdId)
+  ) {
     return NextResponse.json(
       { error: "Invalid household." },
       { status: 400 },

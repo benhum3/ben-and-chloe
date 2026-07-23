@@ -71,7 +71,8 @@ function getGuestStatus(guest: DashboardGuest) {
 }
 
 function escapeCsv(value: string | number | null) {
-  const text = value === null ? "" : String(value);
+  const rawText = value === null ? "" : String(value);
+  const text = /^[=+\-@\t\r]/.test(rawText) ? `'${rawText}` : rawText;
 
   return `"${text.replaceAll('"', '""')}"`;
 }
@@ -286,6 +287,49 @@ export default function AdminPage() {
     );
   }
 
+  function exportFullBackup() {
+    if (!dashboardData) return;
+
+    const songRequests = new Map(
+      dashboardData.songRequests.map((request) => [
+        request.id,
+        request.songRequest,
+      ]),
+    );
+    const messages = new Map(
+      dashboardData.messages.map((message) => [
+        message.id,
+        message.message,
+      ]),
+    );
+
+    downloadCsv(
+      `wedding-rsvp-backup-${new Date().toISOString().slice(0, 10)}.csv`,
+      [
+        "Guest",
+        "Household",
+        "Invitation type",
+        "Status",
+        "Dietary requirements",
+        "Song request",
+        "Guest message",
+        "RSVP submitted",
+      ],
+      dashboardData.guests.map((guest) => [
+        guest.fullName,
+        guest.householdName,
+        guest.invitationType === "day" ? "Day" : "Evening",
+        getGuestStatus(guest),
+        guest.dietaryRequirements ?? "",
+        songRequests.get(guest.householdId) ?? "",
+        messages.get(guest.householdId) ?? "",
+        guest.submittedAt
+          ? new Date(guest.submittedAt).toLocaleString("en-GB")
+          : "",
+      ]),
+    );
+  }
+
   function exportCatering() {
     if (!dashboardData) return;
 
@@ -365,7 +409,11 @@ export default function AdminPage() {
           </h1>
 
           <form onSubmit={handleSubmit} className="mt-12 w-full">
+            <label htmlFor="admin-password" className="sr-only">
+              Admin password
+            </label>
             <input
+              id="admin-password"
               type="password"
               name="admin-password"
               autoComplete="current-password"
@@ -519,7 +567,15 @@ export default function AdminPage() {
                   </p>
                 </div>
                 <div className="mt-5 h-1 overflow-hidden bg-[#ded9cf]">
-                  <div className="h-full bg-[#A97A3D] transition-[width] duration-500" style={{ width: `${responseRate}%` }} />
+                  <div
+                    role="progressbar"
+                    aria-label="Household RSVP progress"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={responseRate}
+                    className="h-full bg-[#A97A3D] transition-[width] duration-500"
+                    style={{ width: `${responseRate}%` }}
+                  />
                 </div>
               </article>
 
@@ -584,6 +640,13 @@ export default function AdminPage() {
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <button
                     type="button"
+                    onClick={exportFullBackup}
+                    className="border border-[#A97A3D] bg-[#A97A3D] px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:bg-transparent hover:text-[#A97A3D]"
+                  >
+                    Full Backup CSV
+                  </button>
+                  <button
+                    type="button"
                     onClick={exportPending}
                     className="border border-[#A97A3D] px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-[#A97A3D] transition hover:bg-[#A97A3D] hover:text-white"
                   >
@@ -601,6 +664,7 @@ export default function AdminPage() {
 
               <div className="grid gap-4 py-6 md:grid-cols-[1fr_auto_auto]">
                 <input
+                  aria-label="Search guests"
                   type="search"
                   value={searchTerm}
                   onChange={(event) =>
@@ -611,6 +675,7 @@ export default function AdminPage() {
                 />
 
                 <select
+                  aria-label="Filter guests by RSVP status"
                   value={statusFilter}
                   onChange={(event) =>
                     setStatusFilter(event.target.value as GuestStatus)
@@ -624,6 +689,7 @@ export default function AdminPage() {
                 </select>
 
                 <select
+                  aria-label="Filter guests by invitation type"
                   value={invitationFilter}
                   onChange={(event) =>
                     setInvitationFilter(

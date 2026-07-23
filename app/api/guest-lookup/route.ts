@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { consumeRateLimit } from "@/lib/rate-limit";
 
 type LookupRequest = {
   name?: unknown;
@@ -8,16 +9,39 @@ type LookupRequest = {
 
 export async function POST(request: Request) {
   try {
+    const rateLimit = consumeRateLimit(request, {
+      namespace: "guest-lookup",
+      limit: 20,
+      windowMs: 15 * 60 * 1000,
+    });
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many searches. Please wait a few minutes and try again." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfter) },
+        },
+      );
+    }
+
     const body = (await request.json()) as LookupRequest;
 
-    if (typeof body.name !== "string" || !body.name.trim()) {
+    if (
+      typeof body.name !== "string" ||
+      !body.name.trim() ||
+      body.name.length > 160
+    ) {
       return NextResponse.json(
         { error: "Please enter the name shown on your invitation." },
         { status: 400 },
       );
     }
 
-    const searchName = body.name.trim().toLowerCase();
+    const searchName = body.name
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
 
     const { data: household, error: householdError } =
       await supabaseAdmin
@@ -32,7 +56,7 @@ export async function POST(request: Request) {
             submitted_at
           `,
         )
-      .ilike("search_name", `%${searchName}%`)
+        .eq("search_name", searchName)
         .maybeSingle();
 
     if (householdError) {

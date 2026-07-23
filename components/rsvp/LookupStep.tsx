@@ -44,6 +44,8 @@ export default function LookupStep({
           onChange={(event) => onNameChange(event.target.value)}
           placeholder="Benjamin Humphrey"
           autoComplete="name"
+          autoCapitalize="words"
+          maxLength={160}
           disabled={isLoading}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? "guest-name-error" : undefined}

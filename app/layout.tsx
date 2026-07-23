@@ -14,9 +14,22 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://humphreywedding.co.uk"),
   title: "Benjamin & Chloe | 19 December 2026",
   description:
     "Join Benjamin and Chloe as they celebrate their wedding on 19 December 2026.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: "/",
+    title: "Benjamin & Chloe | 19 December 2026",
+    description:
+      "Join Benjamin and Chloe as they celebrate their wedding on 19 December 2026.",
+    siteName: "Benjamin & Chloe",
+    locale: "en_GB",
+  },
 };
 
 export const viewport: Viewport = {

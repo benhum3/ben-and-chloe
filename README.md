@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Benjamin & Chloe Wedding Website
 
-## Getting Started
+The public wedding website, personalised RSVP journey and private planning
+dashboard for Benjamin and Chloe's wedding on 19 December 2026.
 
-First, run the development server:
+## Local development
+
+Install dependencies and start the local site:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The site is then available at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Required environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create `.env.local` with these server configuration values:
 
-## Learn More
+```text
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
+ADMIN_PASSWORD=
+```
 
-To learn more about Next.js, take a look at the following resources:
+`ADMIN_PASSWORD` must remain private. Never prefix it with `NEXT_PUBLIC_`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The same variables must be configured for the Production environment in
+Vercel. Preview and Development values can be added there when needed.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Database migrations
 
-## Deploy on Vercel
+SQL files in `supabase/migrations` are applied in filename order. Before a
+deployment that relies on a new migration, run that SQL in the Supabase SQL
+Editor and confirm it completes successfully.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The launch-readiness migration:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- repairs existing invitation lookup keys;
+- makes invitation lookup names unique; and
+- saves each household RSVP atomically so a failed request cannot leave a
+  partially updated response.
+
+## Release checklist
+
+Before pushing a release:
+
+```bash
+npm run lint
+npm run build
+git diff --check
+```
+
+Then verify the public homepage, one day invitation, one evening invitation,
+an updated response, the admin dashboard and each CSV export.
+
+## Backups
+
+The private dashboard includes a **Full Backup CSV**. Download it regularly
+once invitations have been sent, and always before bulk guest-list changes.
+
+The production site is deployed from the `main` branch by Vercel.

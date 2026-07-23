@@ -180,6 +180,11 @@ export default function PlanningTasks() {
             </div>
             <div className="mt-3 h-1 overflow-hidden bg-[#ded9cf]">
               <div
+                role="progressbar"
+                aria-label="Wedding planning progress"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progress}
                 className="h-full bg-[#A97A3D] transition-[width] duration-500"
                 style={{ width: `${progress}%` }}
               />

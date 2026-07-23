@@ -52,6 +52,10 @@ function parseCsv(text: string) {
     }
   }
 
+  if (quoted) {
+    throw new Error("The CSV contains an unfinished quoted value.");
+  }
+
   row.push(value.trim());
   if (row.some(Boolean)) rows.push(row);
 
@@ -501,6 +505,7 @@ export default function GuestManagement({
                 value={manualGuests}
                 onChange={(event) => setManualGuests(event.target.value)}
                 placeholder={"John Smith\nSarah Smith"}
+                maxLength={4000}
                 className="min-h-36 w-full border border-[#ded9cf] bg-transparent px-5 py-4 text-sm leading-7 outline-none transition focus:border-[#A97A3D]"
               />
             </label>
@@ -650,6 +655,7 @@ export default function GuestManagement({
                         )
                       }
                       aria-label={`Guest ${index + 1} name`}
+                      maxLength={160}
                       className="min-w-0 flex-1 border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
                     />
                     <button

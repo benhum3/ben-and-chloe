@@ -106,7 +106,7 @@ export default function Travel() {
 
               <h3 className="mt-3 font-serif text-2xl md:mt-4 md:text-3xl">
                 <a
-                  href="http://www.derbyarmslongridge.co.uk/"
+                  href="https://www.derbyarmslongridge.co.uk/"
                   target="_blank"
                   rel="noreferrer"
                   className={headingLinkClassName}
@@ -124,7 +124,7 @@ export default function Travel() {
               </p>
 
               <a
-                href="http://www.derbyarmslongridge.co.uk/"
+                href="https://www.derbyarmslongridge.co.uk/"
                 target="_blank"
                 rel="noreferrer"
                 className={linkClassName}

@@ -74,6 +74,7 @@ export default function DetailsStep({
                 onDietaryChange(guest.id, event.target.value)
               }
               placeholder="Please let us know of any allergies or dietary requirements. Leave blank if none."
+              maxLength={500}
               className="rsvp-control min-h-28 w-full border border-[#e6e2da] bg-white/20 px-5 py-4 text-sm leading-7 outline-none"
             />
           </label>
@@ -90,6 +91,7 @@ export default function DetailsStep({
               value={songRequest}
               onChange={(event) => onSongRequestChange(event.target.value)}
               placeholder="What song will get you on the dance floor?"
+              maxLength={160}
               className="rsvp-control w-full border border-[#e6e2da] bg-white/20 px-5 py-4 text-sm outline-none"
             />
           </label>
@@ -104,6 +106,7 @@ export default function DetailsStep({
             value={message}
             onChange={(event) => onMessageChange(event.target.value)}
             placeholder="Anything else you'd like us to know?"
+            maxLength={1000}
             className="rsvp-control min-h-28 w-full border border-[#e6e2da] bg-white/20 px-5 py-4 text-sm leading-7 outline-none"
           />
         </label>
