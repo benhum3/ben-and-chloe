@@ -54,7 +54,7 @@ export default function Hero() {
           <p>Reception at Longridge House</p>
         </div>
 
-          <Countdown />
+        <Countdown />
       </div>
 
       <div className="reveal-up delay-600 mt-7 md:mt-10">

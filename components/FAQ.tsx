@@ -66,6 +66,7 @@ export default function FAQ() {
           <div className="border-t border-white/15">
             {questions.map((item, index) => {
               const isOpen = openQuestion === index;
+              const answerId = `faq-answer-${index}`;
 
               return (
                 <article
@@ -76,6 +77,7 @@ export default function FAQ() {
                     type="button"
                     onClick={() => setOpenQuestion(isOpen ? null : index)}
                     aria-expanded={isOpen}
+                    aria-controls={answerId}
                     className="group flex w-full items-center justify-between gap-6 py-6 text-left md:gap-8 md:py-7"
                   >
                     <span className="font-serif text-2xl leading-tight transition-colors duration-300 group-hover:text-[#C79A61] md:text-3xl">
@@ -91,6 +93,9 @@ export default function FAQ() {
                   </button>
 
                   <div
+                    id={answerId}
+                    role="region"
+                    aria-hidden={!isOpen}
                     className={`grid transition-all duration-500 ease-in-out ${
                       isOpen
                         ? "grid-rows-[1fr] pb-6 opacity-100 md:pb-7"

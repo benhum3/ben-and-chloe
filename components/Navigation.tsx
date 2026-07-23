@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Container from "./Container";
 import Monogram from "./Monogram";
@@ -9,6 +9,9 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -36,9 +39,51 @@ export default function Navigation() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusableElements = menuPanelRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled])',
+      );
+
+      if (!focusableElements?.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
+
   const links = [
     ["The Day", "#day"],
-    ["Venue", "#venue"],
+    ["Our Celebration", "#venue"],
     ["Travel", "#travel"],
     ["FAQs", "#faq"],
   ];
@@ -102,11 +147,13 @@ export default function Navigation() {
             </a>
 
             <button
+              ref={menuButtonRef}
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Open navigation menu"
               aria-expanded={menuOpen}
-              className="text-[11px] uppercase tracking-[0.28em] text-neutral-600 md:hidden"
+              aria-controls="mobile-navigation"
+              className="min-h-11 min-w-11 text-[11px] uppercase tracking-[0.28em] text-neutral-600 md:hidden"
             >
               Menu
             </button>
@@ -115,6 +162,13 @@ export default function Navigation() {
       </nav>
 
       <div
+        ref={menuPanelRef}
+        id="mobile-navigation"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+        aria-hidden={!menuOpen}
+        inert={!menuOpen ? true : undefined}
         className={`fixed inset-0 z-[60] bg-[#181818] text-[#f8f6f2] transition-all duration-500 md:hidden ${
           menuOpen
             ? "pointer-events-auto opacity-100"
@@ -122,22 +176,48 @@ export default function Navigation() {
         }`}
       >
         <button
+          ref={closeButtonRef}
           type="button"
           onClick={closeMenu}
           aria-label="Close navigation menu"
-          className="absolute right-6 top-6 text-xs uppercase tracking-[0.3em]"
+          className="absolute right-5 top-5 min-h-11 px-2 text-xs uppercase tracking-[0.3em] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#A97A3D]"
         >
           Close
         </button>
 
-        <div className="flex h-full flex-col items-center justify-center">
-          <div className="mb-14">
+        <div className="flex h-full flex-col items-center px-6 pb-10 pt-20">
+          <div
+            className={`mt-auto transition-all duration-500 ${
+              menuOpen
+                ? "translate-y-0 opacity-100"
+                : "translate-y-3 opacity-0"
+            }`}
+          >
             <Monogram size="small" />
           </div>
 
-          <div className="flex flex-col items-center gap-8 font-serif text-4xl">
-            {links.map(([label, href]) => (
-              <a key={label} href={href} onClick={closeMenu}>
+          <div
+            className={`mt-7 h-px bg-[#A97A3D] transition-all duration-700 ${
+              menuOpen ? "w-12 opacity-100" : "w-0 opacity-0"
+            }`}
+          />
+
+          <nav
+            aria-label="Mobile navigation"
+            className="mt-10 flex flex-col items-center gap-7 font-serif text-[2.35rem] leading-none"
+          >
+            {links.map(([label, href], index) => (
+              <a
+                key={label}
+                href={href}
+                onClick={closeMenu}
+                className={`transition-all duration-500 hover:text-[#C79A61] focus-visible:text-[#C79A61] focus-visible:outline-none ${
+                  menuOpen
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-4 opacity-0"
+                }`}
+                style={{ transitionDelay: `${140 + index * 65}ms` }}
+              >
                 {label}
               </a>
             ))}
@@ -145,11 +225,25 @@ export default function Navigation() {
             <a
               href="/rsvp"
               onClick={closeMenu}
-              className="mt-6 rounded-full border border-[#A97A3D] px-8 py-3 text-base uppercase tracking-[0.25em] text-[#A97A3D] transition hover:bg-[#A97A3D] hover:text-white"
+              className={`mt-4 rounded-full border border-[#A97A3D] px-8 py-3.5 text-[11px] uppercase tracking-[0.28em] text-[#C79A61] transition-all duration-500 hover:bg-[#A97A3D] hover:text-white focus-visible:bg-[#A97A3D] focus-visible:text-white focus-visible:outline-none ${
+                menuOpen
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-4 opacity-0"
+              }`}
+              style={{ transitionDelay: "420ms" }}
             >
               Respond
             </a>
-          </div>
+          </nav>
+
+          <p
+            className={`mb-auto mt-10 text-[9px] uppercase tracking-[0.32em] text-neutral-500 transition-opacity duration-500 ${
+              menuOpen ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ transitionDelay: "480ms" }}
+          >
+            19 December 2026
+          </p>
         </div>
       </div>
     </>

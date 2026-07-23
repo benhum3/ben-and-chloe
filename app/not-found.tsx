@@ -1,4 +1,5 @@
 import Monogram from "@/components/Monogram";
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -18,12 +19,12 @@ export default function NotFound() {
           This page could not be found. Please return to the wedding website.
         </p>
 
-        <a
+        <Link
           href="/"
           className="mt-12 border border-[#181818] px-8 py-4 text-xs uppercase tracking-[0.3em] transition hover:bg-[#181818] hover:text-[#f8f6f2]"
         >
           Return Home
-        </a>
+        </Link>
       </section>
     </main>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 import Monogram from "@/components/Monogram";
 
@@ -239,12 +240,12 @@ export default function AdminPage() {
             </button>
           </form>
 
-          <a
+          <Link
             href="/"
             className="mt-12 text-[10px] uppercase tracking-[0.3em] text-neutral-500 transition hover:text-[#181818]"
           >
             Return Home
-          </a>
+          </Link>
         </section>
       </main>
     );
@@ -574,12 +575,12 @@ export default function AdminPage() {
                 }).format(new Date(dashboardData.generatedAt))}
               </p>
 
-              <a
+              <Link
                 href="/"
                 className="uppercase tracking-[0.25em] transition hover:text-[#181818]"
               >
                 Return Home
-              </a>
+              </Link>
             </div>
           </>
         )}

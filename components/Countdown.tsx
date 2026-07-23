@@ -25,24 +25,30 @@ function getTimeLeft() {
 }
 
 export default function Countdown() {
-  const [mounted, setMounted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
+  const [timeLeft, setTimeLeft] = useState<ReturnType<typeof getTimeLeft> | null>(
+    null,
+  );
 
   useEffect(() => {
-    setMounted(true);
+    const initialUpdate = window.setTimeout(() => {
+      setTimeLeft(getTimeLeft());
+    }, 0);
 
-    const timer = setInterval(() => {
+    const timer = window.setInterval(() => {
       setTimeLeft(getTimeLeft());
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => {
+      window.clearTimeout(initialUpdate);
+      window.clearInterval(timer);
+    };
   }, []);
 
   const countdownItems = [
-    ["Days", timeLeft.days],
-    ["Hours", timeLeft.hours],
-    ["Minutes", timeLeft.minutes],
-    ["Seconds", timeLeft.seconds],
+    ["Days", timeLeft?.days],
+    ["Hours", timeLeft?.hours],
+    ["Minutes", timeLeft?.minutes],
+    ["Seconds", timeLeft?.seconds],
   ];
 
   return (
@@ -63,7 +69,7 @@ export default function Countdown() {
               key={String(value)}
               className="animate-count font-serif text-[1.65rem] leading-none text-[#181818] sm:text-4xl md:text-5xl"
             >
-              {mounted ? value : "--"}
+              {value ?? "--"}
             </div>
 
             <div className="mt-2 text-[8px] uppercase tracking-[0.18em] text-neutral-500 sm:text-[10px] sm:tracking-[0.25em] md:mt-3">

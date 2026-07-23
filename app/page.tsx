@@ -9,28 +9,15 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <>
+    <main>
       <Navigation />
       <Hero />
-
-      <section id="day" className="scroll-mt-32">
-        <Day />
-      </section>
-
-      <section id="venue" className="scroll-mt-32">
-        <Venue />
-      </section>
-
-      <section id="travel" className="scroll-mt-32">
-        <Travel />
-      </section>
-
-      <section id="faq" className="scroll-mt-32">
-        <FAQ />
-      </section>
-
+      <Day />
+      <Venue />
+      <Travel />
+      <FAQ />
       <RSVP />
       <Footer />
-    </>
+    </main>
   );
 }
