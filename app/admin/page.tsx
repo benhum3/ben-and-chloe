@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
+import GuestManagement, {
+  type ManagedHousehold,
+} from "@/components/admin/GuestManagement";
+import PlanningTasks from "@/components/admin/PlanningTasks";
 import Monogram from "@/components/Monogram";
 
 type GuestStatus = "all" | "attending" | "declined" | "pending";
 type InvitationType = "day" | "evening";
+type InvitationFilter = "all" | InvitationType;
 
 type DashboardGuest = {
   id: string;
@@ -71,9 +76,31 @@ function escapeCsv(value: string | number | null) {
   return `"${text.replaceAll('"', '""')}"`;
 }
 
+function downloadCsv(filename: string, headings: string[], rows: Array<Array<string | number | null>>) {
+  const csv = [
+    headings.map(escapeCsv).join(","),
+    ...rows.map((row) => row.map(escapeCsv).join(",")),
+  ].join("\n");
+
+  const blob = new Blob([`\uFEFF${csv}`], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [unlocked, setUnlocked] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [error, setError] = useState("");
 
   const [dashboardData, setDashboardData] =
@@ -85,25 +112,11 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] =
     useState<GuestStatus>("all");
+  const [invitationFilter, setInvitationFilter] =
+    useState<InvitationFilter>("all");
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-      setUnlocked(true);
-      setError("");
-    } else {
-      setError("Incorrect password.");
-    }
-  }
-
-  useEffect(() => {
-    if (!unlocked) {
-      return;
-    }
-
-    async function loadDashboard() {
-      setLoading(true);
+  const loadDashboard = useCallback(async (showLoading = true) => {
+      if (showLoading) setLoading(true);
       setDashboardError("");
 
       try {
@@ -113,11 +126,18 @@ export default function AdminPage() {
 
         const data = await response.json();
 
+        if (response.status === 401) {
+          setUnlocked(false);
+          setDashboardData(null);
+          return;
+        }
+
         if (!response.ok) {
           throw new Error(data.error ?? "Unable to load dashboard.");
         }
 
         setDashboardData(data);
+        setUnlocked(true);
       } catch (loadError) {
         setDashboardError(
           loadError instanceof Error
@@ -125,12 +145,51 @@ export default function AdminPage() {
             : "Unable to load dashboard.",
         );
       } finally {
-        setLoading(false);
+        if (showLoading) setLoading(false);
+        setAuthChecking(false);
       }
-    }
+  }, []);
 
-    void loadDashboard();
-  }, [unlocked]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadDashboard();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [loadDashboard]);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSigningIn(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = (await response.json()) as { error?: string };
+
+      if (!response.ok) {
+        setError(data.error ?? "Unable to sign in.");
+        return;
+      }
+
+      setPassword("");
+      await loadDashboard();
+    } catch {
+      setError("Unable to sign in. Please try again.");
+    } finally {
+      setIsSigningIn(false);
+    }
+  }
+
+  async function handleLogout() {
+    await fetch("/api/admin/logout", { method: "POST" });
+    setUnlocked(false);
+    setDashboardData(null);
+  }
 
   const filteredGuests = useMemo(() => {
     if (!dashboardData) {
@@ -157,9 +216,43 @@ export default function AdminPage() {
         (statusFilter === "pending" &&
           guest.attending === null);
 
-      return matchesSearch && matchesStatus;
+      const matchesInvitation =
+        invitationFilter === "all" ||
+        guest.invitationType === invitationFilter;
+
+      return matchesSearch && matchesStatus && matchesInvitation;
     });
-  }, [dashboardData, searchTerm, statusFilter]);
+  }, [dashboardData, invitationFilter, searchTerm, statusFilter]);
+
+  const managedHouseholds = useMemo<ManagedHousehold[]>(() => {
+    if (!dashboardData) return [];
+
+    const grouped = new Map<string, ManagedHousehold>();
+
+    dashboardData.guests.forEach((guest) => {
+      const household = grouped.get(guest.householdId);
+      const managedGuest = {
+        id: guest.id,
+        fullName: guest.fullName,
+        attending: guest.attending,
+      };
+
+      if (household) {
+        household.guests.push(managedGuest);
+      } else {
+        grouped.set(guest.householdId, {
+          id: guest.householdId,
+          invitationName: guest.householdName,
+          invitationType: guest.invitationType,
+          guests: [managedGuest],
+        });
+      }
+    });
+
+    return Array.from(grouped.values()).sort((left, right) =>
+      left.invitationName.localeCompare(right.invitationName),
+    );
+  }, [dashboardData]);
 
   function exportGuests() {
     if (!dashboardData) {
@@ -186,28 +279,75 @@ export default function AdminPage() {
         : "",
     ]);
 
-    const csv = [
-      headings.map(escapeCsv).join(","),
-      ...rows.map((row) => row.map(escapeCsv).join(",")),
-    ].join("\n");
+    downloadCsv(
+      `wedding-guests-${new Date().toISOString().slice(0, 10)}.csv`,
+      headings,
+      rows,
+    );
+  }
 
-    const blob = new Blob([`\uFEFF${csv}`], {
-      type: "text/csv;charset=utf-8;",
-    });
+  function exportCatering() {
+    if (!dashboardData) return;
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const attendingGuests = dashboardData.guests.filter(
+      (guest) => guest.attending === true,
+    );
 
-    link.href = url;
-    link.download = `wedding-guests-${new Date()
-      .toISOString()
-      .slice(0, 10)}.csv`;
+    downloadCsv(
+      `wedding-catering-${new Date().toISOString().slice(0, 10)}.csv`,
+      ["Guest", "Invitation type", "Dietary requirements"],
+      attendingGuests.map((guest) => [
+        guest.fullName,
+        guest.invitationType === "day" ? "Day" : "Evening",
+        guest.dietaryRequirements?.trim() || "None provided",
+      ]),
+    );
+  }
 
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+  function exportSongRequests() {
+    if (!dashboardData) return;
 
-    URL.revokeObjectURL(url);
+    downloadCsv(
+      `wedding-song-requests-${new Date().toISOString().slice(0, 10)}.csv`,
+      ["Song request", "Requested by"],
+      dashboardData.songRequests.map((request) => [
+        request.songRequest,
+        request.invitationName,
+      ]),
+    );
+  }
+
+  function exportPending() {
+    if (!dashboardData) return;
+
+    const pendingHouseholds = new Map<string, DashboardGuest[]>();
+
+    dashboardData.guests
+      .filter((guest) => guest.attending === null)
+      .forEach((guest) => {
+        const current = pendingHouseholds.get(guest.householdId) ?? [];
+        pendingHouseholds.set(guest.householdId, [...current, guest]);
+      });
+
+    downloadCsv(
+      `pending-rsvps-${new Date().toISOString().slice(0, 10)}.csv`,
+      ["Household", "Invitation type", "Guests"],
+      Array.from(pendingHouseholds.values()).map((guests) => [
+        guests[0]?.householdName ?? "",
+        guests[0]?.invitationType === "evening" ? "Evening" : "Day",
+        guests.map((guest) => guest.fullName).join(", "),
+      ]),
+    );
+  }
+
+  if (authChecking) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f8f6f2] text-[#181818]">
+        <p className="text-xs uppercase tracking-[0.32em] text-neutral-500">
+          Opening private area
+        </p>
+      </main>
+    );
   }
 
   if (!unlocked) {
@@ -227,6 +367,10 @@ export default function AdminPage() {
           <form onSubmit={handleSubmit} className="mt-12 w-full">
             <input
               type="password"
+              name="admin-password"
+              autoComplete="current-password"
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? "admin-login-error" : undefined}
               placeholder="Password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -234,16 +378,21 @@ export default function AdminPage() {
             />
 
             {error && (
-              <p className="mt-4 text-xs uppercase tracking-[0.2em] text-red-700">
+              <p
+                id="admin-login-error"
+                role="alert"
+                className="mt-4 text-xs uppercase tracking-[0.2em] text-red-700"
+              >
                 {error}
               </p>
             )}
 
             <button
               type="submit"
-              className="mt-6 w-full border border-[#181818] px-6 py-4 text-xs uppercase tracking-[0.3em] transition hover:bg-[#181818] hover:text-[#f8f6f2]"
+              disabled={isSigningIn || !password}
+              className="mt-6 w-full rounded-full border border-[#A97A3D] bg-[#A97A3D] px-6 py-4 text-xs uppercase tracking-[0.3em] text-white transition hover:bg-transparent hover:text-[#A97A3D] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Enter
+              {isSigningIn ? "Signing In..." : "Enter"}
             </button>
           </form>
 
@@ -259,6 +408,27 @@ export default function AdminPage() {
   }
 
   const stats = dashboardData?.stats;
+  const responseRate = stats?.totalHouseholds
+    ? Math.round(
+        ((stats.householdsResponded ?? 0) / stats.totalHouseholds) * 100,
+      )
+    : 0;
+  const dietaryRequirementsCount =
+    dashboardData?.guests.filter(
+      (guest) =>
+        guest.attending === true &&
+        Boolean(guest.dietaryRequirements?.trim()),
+    ).length ?? 0;
+  const dayGuestsAttending =
+    dashboardData?.guests.filter(
+      (guest) =>
+        guest.invitationType === "day" && guest.attending === true,
+    ).length ?? 0;
+  const eveningGuestsAttending =
+    dashboardData?.guests.filter(
+      (guest) =>
+        guest.invitationType === "evening" && guest.attending === true,
+    ).length ?? 0;
 
   const statisticCards = [
     ["Guests Invited", stats?.totalGuests ?? "—"],
@@ -286,9 +456,23 @@ export default function AdminPage() {
           </h1>
 
           <p className="mt-6 max-w-xl text-sm leading-8 text-neutral-600">
-            Invitations, responses and guest information in one place.
+            Invitations, responses and wedding planning in one private place.
           </p>
+
         </div>
+
+        <nav
+          aria-label="Dashboard sections"
+          className="sticky top-3 z-40 mx-auto mb-12 flex w-fit max-w-full flex-wrap justify-center gap-x-5 gap-y-2 rounded-full border border-[#ded9cf]/80 bg-[#f8f6f2]/90 px-5 py-3 text-[9px] uppercase tracking-[0.2em] text-neutral-500 shadow-[0_8px_30px_rgba(24,24,24,0.06)] backdrop-blur-md md:gap-x-7 md:px-7 md:text-[10px] md:tracking-[0.24em]"
+        >
+          <a href="#overview" className="transition hover:text-[#A97A3D]">Overview</a>
+          <a href="#planning" className="transition hover:text-[#A97A3D]">Planning</a>
+          <a href="#guest-management" className="transition hover:text-[#A97A3D]">Add Guests</a>
+          <a href="#guests" className="transition hover:text-[#A97A3D]">Guests</a>
+          <button type="button" onClick={() => void handleLogout()} className="transition hover:text-[#A97A3D]">
+            Sign Out
+          </button>
+        </nav>
 
         {loading && (
           <div className="border border-[#e6e2da] px-6 py-12 text-center">
@@ -306,22 +490,81 @@ export default function AdminPage() {
 
         {!loading && !dashboardError && dashboardData && (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div id="overview" className="grid scroll-mt-28 grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {statisticCards.map(([label, value]) => (
                 <div
                   key={label}
-                  className="border border-[#e6e2da] bg-[#f8f6f2]/70 p-8 text-center transition duration-300 hover:-translate-y-1 hover:shadow-sm"
+                  className="border border-[#e6e2da] bg-[#f8f6f2]/70 px-3 py-6 text-center transition duration-300 hover:-translate-y-1 hover:shadow-sm sm:p-8"
                 >
-                  <p className="font-serif text-5xl">{value}</p>
+                  <p className="font-serif text-3xl sm:text-5xl">{value}</p>
 
-                  <p className="mt-4 text-xs uppercase tracking-[0.25em] text-neutral-500">
+                  <p className="mt-3 text-[9px] uppercase tracking-[0.18em] text-neutral-500 sm:mt-4 sm:text-xs sm:tracking-[0.25em]">
                     {label}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-16">
+            <div className="mt-8 grid gap-4 lg:grid-cols-3">
+              <article className="border border-[#ded9cf] p-7">
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+                      RSVP Progress
+                    </p>
+                    <p className="mt-3 font-serif text-4xl">{responseRate}%</p>
+                  </div>
+                  <p className="text-sm text-neutral-500">
+                    {stats?.householdsResponded ?? 0}/{stats?.totalHouseholds ?? 0}
+                  </p>
+                </div>
+                <div className="mt-5 h-1 overflow-hidden bg-[#ded9cf]">
+                  <div className="h-full bg-[#A97A3D] transition-[width] duration-500" style={{ width: `${responseRate}%` }} />
+                </div>
+              </article>
+
+              <article className="border border-[#ded9cf] p-7">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+                  Confirmed Attendance
+                </p>
+                <div className="mt-5 flex gap-8">
+                  <div>
+                    <p className="font-serif text-3xl">{dayGuestsAttending}</p>
+                    <p className="mt-1 text-xs text-neutral-500">Day guests</p>
+                  </div>
+                  <div>
+                    <p className="font-serif text-3xl">{eveningGuestsAttending}</p>
+                    <p className="mt-1 text-xs text-neutral-500">Evening guests</p>
+                  </div>
+                </div>
+              </article>
+
+              <article className="border border-[#ded9cf] p-7">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+                  Catering Attention
+                </p>
+                <p className="mt-3 font-serif text-4xl">{dietaryRequirementsCount}</p>
+                <p className="mt-2 text-sm leading-6 text-neutral-500">
+                  attending guests have supplied dietary requirements
+                </p>
+                <button type="button" onClick={exportCatering} className="mt-5 border-b border-[#A97A3D] pb-1 text-[9px] uppercase tracking-[0.22em] text-[#A97A3D]">
+                  Export catering list
+                </button>
+              </article>
+            </div>
+
+            <div className="mt-20">
+              <PlanningTasks />
+            </div>
+
+            <div className="mt-20">
+              <GuestManagement
+                households={managedHouseholds}
+                onChanged={() => loadDashboard(false)}
+              />
+            </div>
+
+            <div id="guests" className="mt-20 scroll-mt-28">
               <div className="flex flex-col gap-6 border-b border-[#e6e2da] pb-8 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
@@ -338,16 +581,25 @@ export default function AdminPage() {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={exportGuests}
-                  className="border border-[#181818] px-6 py-4 text-xs uppercase tracking-[0.25em] transition hover:bg-[#181818] hover:text-[#f8f6f2]"
-                >
-                  Export CSV
-                </button>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={exportPending}
+                    className="border border-[#A97A3D] px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-[#A97A3D] transition hover:bg-[#A97A3D] hover:text-white"
+                  >
+                    Pending RSVPs
+                  </button>
+                  <button
+                    type="button"
+                    onClick={exportGuests}
+                    className="border border-[#181818] px-5 py-3 text-[10px] uppercase tracking-[0.22em] transition hover:bg-[#181818] hover:text-[#f8f6f2]"
+                  >
+                    All Guests CSV
+                  </button>
+                </div>
               </div>
 
-              <div className="grid gap-4 py-6 md:grid-cols-[1fr_auto]">
+              <div className="grid gap-4 py-6 md:grid-cols-[1fr_auto_auto]">
                 <input
                   type="search"
                   value={searchTerm}
@@ -369,6 +621,20 @@ export default function AdminPage() {
                   <option value="attending">Attending</option>
                   <option value="declined">Declined</option>
                   <option value="pending">Pending</option>
+                </select>
+
+                <select
+                  value={invitationFilter}
+                  onChange={(event) =>
+                    setInvitationFilter(
+                      event.target.value as InvitationFilter,
+                    )
+                  }
+                  className="border border-[#e6e2da] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                >
+                  <option value="all">All invitations</option>
+                  <option value="day">Day guests</option>
+                  <option value="evening">Evening guests</option>
                 </select>
               </div>
 
@@ -467,13 +733,26 @@ export default function AdminPage() {
 
             <div className="mt-20 grid gap-12 lg:grid-cols-2">
               <section>
-                <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
-                  Song Requests
-                </p>
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
+                      Song Requests
+                    </p>
 
-                <h2 className="mt-3 font-serif text-4xl">
-                  Dance floor suggestions
-                </h2>
+                    <h2 className="mt-3 font-serif text-4xl">
+                      Dance floor suggestions
+                    </h2>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={exportSongRequests}
+                    disabled={dashboardData.songRequests.length === 0}
+                    className="self-start border-b border-[#A97A3D] pb-1 text-[9px] uppercase tracking-[0.22em] text-[#A97A3D] transition hover:text-[#181818] disabled:cursor-not-allowed disabled:border-neutral-300 disabled:text-neutral-400 sm:self-auto"
+                  >
+                    Export for DJ
+                  </button>
+                </div>
 
                 <div className="mt-8 divide-y divide-[#e6e2da] border-y border-[#e6e2da]">
                   {dashboardData.songRequests.length > 0 ? (
