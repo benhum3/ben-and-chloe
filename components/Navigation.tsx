@@ -104,7 +104,7 @@ export default function Navigation() {
           className="absolute left-0 top-0 h-[2px] w-full overflow-hidden"
         >
           <div
-            className="h-full bg-[#A97A3D] transition-[width] duration-150 ease-out"
+            className="h-full bg-[#d2a641] transition-[width] duration-150 ease-out"
             style={{ width: `${scrollProgress}%` }}
           />
         </div>
@@ -134,14 +134,14 @@ export default function Navigation() {
                 >
                   {label}
 
-                  <span className="absolute -bottom-2 left-0 h-px w-0 bg-[#A97A3D] transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute -bottom-2 left-0 h-px w-0 bg-[#d2a641] transition-all duration-300 group-hover:w-full" />
                 </a>
               ))}
             </div>
 
             <a
               href="/rsvp"
-              className="hidden rounded-full border border-[#A97A3D] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[#A97A3D] transition-all duration-300 hover:bg-[#A97A3D] hover:text-white md:block"
+              className="hidden rounded-full border border-[#d2a641] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[var(--gold-text)] transition-all duration-300 hover:bg-[#d2a641] hover:text-[#181818] md:block"
             >
               Respond
             </a>
@@ -164,6 +164,7 @@ export default function Navigation() {
       <div
         ref={menuPanelRef}
         id="mobile-navigation"
+        data-gold-theme="dark"
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
@@ -180,7 +181,7 @@ export default function Navigation() {
           type="button"
           onClick={closeMenu}
           aria-label="Close navigation menu"
-          className="absolute right-5 top-5 min-h-11 px-2 text-xs uppercase tracking-[0.3em] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#A97A3D]"
+          className="absolute right-5 top-5 min-h-11 px-2 text-xs uppercase tracking-[0.3em] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641]"
         >
           Close
         </button>
@@ -197,7 +198,7 @@ export default function Navigation() {
           </div>
 
           <div
-            className={`mt-7 h-px bg-[#A97A3D] transition-all duration-700 ${
+            className={`mt-7 h-px bg-[#d2a641] transition-all duration-700 ${
               menuOpen ? "w-12 opacity-100" : "w-0 opacity-0"
             }`}
           />
@@ -211,7 +212,7 @@ export default function Navigation() {
                 key={label}
                 href={href}
                 onClick={closeMenu}
-                className={`transition-all duration-500 hover:text-[#C79A61] focus-visible:text-[#C79A61] focus-visible:outline-none ${
+                className={`transition-all duration-500 hover:text-[var(--gold-text)] focus-visible:text-[var(--gold-text)] focus-visible:outline-none ${
                   menuOpen
                     ? "translate-y-0 opacity-100"
                     : "translate-y-4 opacity-0"
@@ -225,7 +226,7 @@ export default function Navigation() {
             <a
               href="/rsvp"
               onClick={closeMenu}
-              className={`mt-4 rounded-full border border-[#A97A3D] px-8 py-3.5 text-[11px] uppercase tracking-[0.28em] text-[#C79A61] transition-all duration-500 hover:bg-[#A97A3D] hover:text-white focus-visible:bg-[#A97A3D] focus-visible:text-white focus-visible:outline-none ${
+              className={`mt-4 rounded-full border border-[#d2a641] px-8 py-3.5 text-[11px] uppercase tracking-[0.28em] text-[var(--gold-text)] transition-all duration-500 hover:bg-[#d2a641] hover:text-[#181818] focus-visible:bg-[#d2a641] focus-visible:text-[#181818] focus-visible:outline-none ${
                 menuOpen
                   ? "translate-y-0 opacity-100"
                   : "translate-y-4 opacity-0"

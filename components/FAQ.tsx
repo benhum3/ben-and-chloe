@@ -42,12 +42,13 @@ export default function FAQ() {
   return (
     <section
       id="faq"
+      data-gold-theme="dark"
       className="scroll-mt-28 bg-[#181818] py-20 text-[#f8f6f2] md:py-28"
     >
       <Container>
         <div className="grid gap-12 lg:grid-cols-[0.75fr_1.25fr] lg:gap-24">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.35em] text-[#C79A61] md:text-[11px] md:tracking-[0.38em]">
+            <p className="text-[10px] uppercase tracking-[0.35em] text-[var(--gold-text)] md:text-[11px] md:tracking-[0.38em]">
               Useful Information
             </p>
 
@@ -80,13 +81,13 @@ export default function FAQ() {
                     aria-controls={answerId}
                     className="group flex w-full items-center justify-between gap-6 py-6 text-left md:gap-8 md:py-7"
                   >
-                    <span className="font-serif text-2xl leading-tight transition-colors duration-300 group-hover:text-[#C79A61] md:text-3xl">
+                    <span className="font-serif text-2xl leading-tight transition-colors duration-300 group-hover:text-[var(--gold-text)] md:text-3xl">
                       {item.question}
                     </span>
 
                     <span
                       aria-hidden="true"
-                      className="shrink-0 text-2xl font-light text-[#C79A61]"
+                      className="shrink-0 text-2xl font-light text-[var(--gold-text)]"
                     >
                       {isOpen ? "×" : "+"}
                     </span>

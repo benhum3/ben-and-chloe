@@ -18,7 +18,7 @@ export default function Hero() {
       <h1 className="reveal-up delay-300 font-serif text-[2.75rem] leading-none tracking-tight sm:text-5xl md:text-8xl">
         Benjamin
 
-        <span className="my-2 block text-3xl italic text-[#A97A3D] sm:text-4xl md:my-4 md:text-6xl">
+        <span className="my-2 block text-3xl italic text-[var(--gold-text)] sm:text-4xl md:my-4 md:text-6xl">
           &amp;
         </span>
 
@@ -26,13 +26,13 @@ export default function Hero() {
       </h1>
 
       <div className="reveal-up delay-400 my-6 flex items-center gap-3 md:my-10 md:gap-4">
-        <div className="h-px w-12 bg-[#C9B38A] md:w-16" />
+        <div className="h-px w-12 bg-[#d2a641] md:w-16" />
 
-        <span className="font-serif text-base text-[#A97A3D] md:text-xl">
+        <span className="font-serif text-base text-[var(--gold-text)] md:text-xl">
           ◆
         </span>
 
-        <div className="h-px w-12 bg-[#C9B38A] md:w-16" />
+        <div className="h-px w-12 bg-[#d2a641] md:w-16" />
       </div>
 
       <div className="reveal-up delay-500">

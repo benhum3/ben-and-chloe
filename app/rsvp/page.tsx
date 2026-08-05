@@ -255,11 +255,11 @@ export default function RSVPPage() {
     <main className="relative min-h-screen overflow-hidden bg-[#f8f6f2] px-6 py-20 text-[#181818] md:py-24">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-12 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full border border-[#A97A3D]/10 md:h-[46rem] md:w-[46rem]"
+        className="pointer-events-none absolute left-1/2 top-12 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full border border-[#d2a641]/10 md:h-[46rem] md:w-[46rem]"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-36 h-[22rem] w-[22rem] -translate-x-1/2 rounded-full border border-[#A97A3D]/10 md:h-[32rem] md:w-[32rem]"
+        className="pointer-events-none absolute left-1/2 top-36 h-[22rem] w-[22rem] -translate-x-1/2 rounded-full border border-[#d2a641]/10 md:h-[32rem] md:w-[32rem]"
       />
 
       <section className="relative z-10 mx-auto flex min-h-[80vh] max-w-2xl flex-col items-center justify-center text-center">
@@ -283,7 +283,7 @@ export default function RSVPPage() {
                     aria-hidden="true"
                     className={`h-px w-12 transition-colors duration-500 sm:w-16 ${
                       index <= currentJourneyStep
-                        ? "bg-[#A97A3D]"
+                        ? "bg-[#d2a641]"
                         : "bg-[#ded9cf]"
                     }`}
                   />
@@ -292,7 +292,7 @@ export default function RSVPPage() {
                   aria-hidden="true"
                   className={`h-2.5 w-2.5 rotate-45 border transition-all duration-500 ${
                     index <= currentJourneyStep
-                      ? "border-[#A97A3D] bg-[#A97A3D]"
+                      ? "border-[#d2a641] bg-[#d2a641]"
                       : "border-[#cfc8bb] bg-[#f8f6f2]"
                   }`}
                 />
@@ -373,7 +373,7 @@ export default function RSVPPage() {
 
         <Link
           href="/"
-          className="mt-14 text-[10px] uppercase tracking-[0.3em] text-neutral-500 transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
+          className="mt-14 text-[10px] uppercase tracking-[0.3em] text-neutral-500 transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
         >
           Return Home
         </Link>

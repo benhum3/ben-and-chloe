@@ -3,20 +3,23 @@ import Monogram from "./Monogram";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#111111] py-16 text-[#f8f6f2] md:py-20">
+    <footer
+      data-gold-theme="dark"
+      className="bg-[#111111] py-16 text-[#f8f6f2] md:py-20"
+    >
       <Container>
         <div className="flex flex-col items-center text-center">
           <a
             href="#home"
             aria-label="Return to the top of the page"
-            className="transition-transform duration-300 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A97A3D] focus-visible:ring-offset-4 focus-visible:ring-offset-[#111111]"
+            className="transition-transform duration-300 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2a641] focus-visible:ring-offset-4 focus-visible:ring-offset-[#111111]"
           >
             <div className="scale-110">
               <Monogram size="small" />
             </div>
           </a>
 
-          <div className="mx-auto mt-7 h-px w-12 bg-[#A97A3D]" />
+          <div className="mx-auto mt-7 h-px w-12 bg-[#d2a641]" />
 
           <p className="mt-7 max-w-md font-serif text-3xl leading-tight md:text-4xl">
             We can&apos;t wait to celebrate with you.
@@ -32,35 +35,35 @@ export default function Footer() {
           >
             <a
               href="#day"
-              className="transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
+              className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               The Day
             </a>
 
             <a
               href="#venue"
-              className="transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
+              className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               Our Celebration
             </a>
 
             <a
               href="#travel"
-              className="transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
+              className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               Travel
             </a>
 
             <a
               href="#faq"
-              className="transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
+              className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               FAQs
             </a>
 
             <a
               href="/rsvp"
-              className="transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
+              className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               Respond
             </a>
@@ -73,7 +76,7 @@ export default function Footer() {
               <a
                 href="/admin"
                 aria-label="Administration"
-                className="transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
+                className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
               >
                 Private
               </a>

@@ -422,7 +422,7 @@ export default function AdminPage() {
               placeholder="Password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-center text-sm outline-none transition focus:border-[#A97A3D]"
+              className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-center text-sm outline-none transition focus:border-[#d2a641]"
             />
 
             {error && (
@@ -438,7 +438,7 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={isSigningIn || !password}
-              className="mt-6 w-full rounded-full border border-[#A97A3D] bg-[#A97A3D] px-6 py-4 text-xs uppercase tracking-[0.3em] text-white transition hover:bg-transparent hover:text-[#A97A3D] disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-6 w-full rounded-full border border-[#d2a641] bg-[#d2a641] px-6 py-4 text-xs uppercase tracking-[0.3em] text-[#181818] transition hover:bg-transparent hover:text-[var(--gold-text)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSigningIn ? "Signing In..." : "Enter"}
             </button>
@@ -513,11 +513,11 @@ export default function AdminPage() {
           aria-label="Dashboard sections"
           className="sticky top-[calc(env(safe-area-inset-top)+0.75rem)] z-40 mx-auto mb-12 flex w-fit max-w-full flex-wrap justify-center gap-x-5 gap-y-2 rounded-full border border-[#ded9cf]/80 bg-[#f8f6f2]/90 px-5 py-3 text-[9px] uppercase tracking-[0.2em] text-neutral-500 shadow-[0_8px_30px_rgba(24,24,24,0.06)] backdrop-blur-md md:top-3 md:gap-x-7 md:px-7 md:text-[10px] md:tracking-[0.24em]"
         >
-          <a href="#overview" className="transition hover:text-[#A97A3D]">Overview</a>
-          <a href="#planning" className="transition hover:text-[#A97A3D]">Planning</a>
-          <a href="#guest-management" className="transition hover:text-[#A97A3D]">Add Guests</a>
-          <a href="#guests" className="transition hover:text-[#A97A3D]">Guests</a>
-          <button type="button" onClick={() => void handleLogout()} className="transition hover:text-[#A97A3D]">
+          <a href="#overview" className="transition hover:text-[var(--gold-text)]">Overview</a>
+          <a href="#planning" className="transition hover:text-[var(--gold-text)]">Planning</a>
+          <a href="#guest-management" className="transition hover:text-[var(--gold-text)]">Add Guests</a>
+          <a href="#guests" className="transition hover:text-[var(--gold-text)]">Guests</a>
+          <button type="button" onClick={() => void handleLogout()} className="transition hover:text-[var(--gold-text)]">
             Sign Out
           </button>
         </nav>
@@ -573,7 +573,7 @@ export default function AdminPage() {
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={responseRate}
-                    className="h-full bg-[#A97A3D] transition-[width] duration-500"
+                    className="h-full bg-[#d2a641] transition-[width] duration-500"
                     style={{ width: `${responseRate}%` }}
                   />
                 </div>
@@ -603,7 +603,7 @@ export default function AdminPage() {
                 <p className="mt-2 text-sm leading-6 text-neutral-500">
                   attending guests have supplied dietary requirements
                 </p>
-                <button type="button" onClick={exportCatering} className="mt-5 border-b border-[#A97A3D] pb-1 text-[9px] uppercase tracking-[0.22em] text-[#A97A3D]">
+                <button type="button" onClick={exportCatering} className="mt-5 border-b border-[#d2a641] pb-1 text-[9px] uppercase tracking-[0.22em] text-[var(--gold-text)]">
                   Export catering list
                 </button>
               </article>
@@ -641,14 +641,14 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={exportFullBackup}
-                    className="border border-[#A97A3D] bg-[#A97A3D] px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-white transition hover:bg-transparent hover:text-[#A97A3D]"
+                    className="border border-[#d2a641] bg-[#d2a641] px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-[#181818] transition hover:bg-transparent hover:text-[var(--gold-text)]"
                   >
                     Full Backup CSV
                   </button>
                   <button
                     type="button"
                     onClick={exportPending}
-                    className="border border-[#A97A3D] px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-[#A97A3D] transition hover:bg-[#A97A3D] hover:text-white"
+                    className="border border-[#d2a641] px-5 py-3 text-[10px] uppercase tracking-[0.22em] text-[var(--gold-text)] transition hover:bg-[#d2a641] hover:text-[#181818]"
                   >
                     Pending RSVPs
                   </button>
@@ -671,7 +671,7 @@ export default function AdminPage() {
                     setSearchTerm(event.target.value)
                   }
                   placeholder="Search guest, household or dietary requirement"
-                  className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                  className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
                 />
 
                 <select
@@ -680,7 +680,7 @@ export default function AdminPage() {
                   onChange={(event) =>
                     setStatusFilter(event.target.value as GuestStatus)
                   }
-                  className="border border-[#e6e2da] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                  className="border border-[#e6e2da] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
                 >
                   <option value="all">All statuses</option>
                   <option value="attending">Attending</option>
@@ -696,7 +696,7 @@ export default function AdminPage() {
                       event.target.value as InvitationFilter,
                     )
                   }
-                  className="border border-[#e6e2da] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                  className="border border-[#e6e2da] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
                 >
                   <option value="all">All invitations</option>
                   <option value="day">Day guests</option>
@@ -814,7 +814,7 @@ export default function AdminPage() {
                     type="button"
                     onClick={exportSongRequests}
                     disabled={dashboardData.songRequests.length === 0}
-                    className="self-start border-b border-[#A97A3D] pb-1 text-[9px] uppercase tracking-[0.22em] text-[#A97A3D] transition hover:text-[#181818] disabled:cursor-not-allowed disabled:border-neutral-300 disabled:text-neutral-400 sm:self-auto"
+                    className="self-start border-b border-[#d2a641] pb-1 text-[9px] uppercase tracking-[0.22em] text-[var(--gold-text)] transition hover:text-[#181818] disabled:cursor-not-allowed disabled:border-neutral-300 disabled:text-neutral-400 sm:self-auto"
                   >
                     Export for DJ
                   </button>
@@ -988,7 +988,7 @@ function StatusBadge({
 
 function InvitationTypeBadge({ type }: { type: InvitationType }) {
   return (
-    <span className="inline-flex whitespace-nowrap border border-[#A97A3D]/35 bg-[#A97A3D]/5 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[#8A642F]">
+    <span className="inline-flex whitespace-nowrap border border-[#d2a641]/35 bg-[#d2a641]/5 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[#8a681e]">
       {type === "day" ? "Day Guest" : "Evening Guest"}
     </span>
   );

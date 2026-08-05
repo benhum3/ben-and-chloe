@@ -407,7 +407,7 @@ export default function GuestManagement({
   return (
     <section id="guest-management" className="scroll-mt-28 border-t border-[#ded9cf] pt-16">
       <div className="max-w-2xl">
-        <p className="text-xs uppercase tracking-[0.35em] text-[#A97A3D]">
+        <p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-text)]">
           Guest Management
         </p>
         <h2 className="mt-4 font-serif text-4xl md:text-6xl">
@@ -438,8 +438,8 @@ export default function GuestManagement({
             }}
             className={`rounded-full border px-5 py-3 text-[10px] uppercase tracking-[0.23em] transition ${
               mode === value
-                ? "border-[#A97A3D] bg-[#A97A3D] text-white"
-                : "border-[#cfc8bb] text-neutral-600 hover:border-[#A97A3D] hover:text-[#A97A3D]"
+                ? "border-[#d2a641] bg-[#d2a641] text-[#181818]"
+                : "border-[#cfc8bb] text-neutral-600 hover:border-[#d2a641] hover:text-[var(--gold-text)]"
             }`}
           >
             {label}
@@ -477,7 +477,7 @@ export default function GuestManagement({
                 onChange={(event) => setManualName(event.target.value)}
                 placeholder="John & Sarah Smith"
                 maxLength={160}
-                className="w-full border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                className="w-full border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
               />
             </label>
 
@@ -488,7 +488,7 @@ export default function GuestManagement({
               <select
                 value={manualType}
                 onChange={(event) => setManualType(event.target.value as InvitationType)}
-                className="w-full border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                className="w-full border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
               >
                 <option value="day">Day invitation</option>
                 <option value="evening">Evening invitation</option>
@@ -506,13 +506,13 @@ export default function GuestManagement({
                 onChange={(event) => setManualGuests(event.target.value)}
                 placeholder={"John Smith\nSarah Smith"}
                 maxLength={4000}
-                className="min-h-36 w-full border border-[#ded9cf] bg-transparent px-5 py-4 text-sm leading-7 outline-none transition focus:border-[#A97A3D]"
+                className="min-h-36 w-full border border-[#ded9cf] bg-transparent px-5 py-4 text-sm leading-7 outline-none transition focus:border-[#d2a641]"
               />
             </label>
             <button
               type="submit"
               disabled={saving}
-              className="mt-4 w-full rounded-full border border-[#A97A3D] bg-[#A97A3D] px-7 py-4 text-[10px] uppercase tracking-[0.28em] text-white transition hover:bg-transparent hover:text-[#A97A3D] disabled:opacity-50"
+              className="mt-4 w-full rounded-full border border-[#d2a641] bg-[#d2a641] px-7 py-4 text-[10px] uppercase tracking-[0.28em] text-[#181818] transition hover:bg-transparent hover:text-[var(--gold-text)] disabled:opacity-50"
             >
               {saving ? "Adding Invitation..." : "Add Invitation"}
             </button>
@@ -535,7 +535,7 @@ export default function GuestManagement({
             <button
               type="button"
               onClick={downloadTemplate}
-              className="mt-6 border-b border-[#A97A3D] pb-1 text-[10px] uppercase tracking-[0.24em] text-[#A97A3D]"
+              className="mt-6 border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.24em] text-[var(--gold-text)]"
             >
               Download template
             </button>
@@ -559,7 +559,7 @@ export default function GuestManagement({
                     <article key={household.invitationName} className="py-5">
                       <div className="flex items-start justify-between gap-4">
                         <p className="font-serif text-xl">{household.invitationName}</p>
-                        <span className="text-[9px] uppercase tracking-[0.2em] text-[#A97A3D]">
+                        <span className="text-[9px] uppercase tracking-[0.2em] text-[var(--gold-text)]">
                           {household.invitationType}
                         </span>
                       </div>
@@ -576,7 +576,7 @@ export default function GuestManagement({
                   type="button"
                   onClick={() => void importHouseholds(preview)}
                   disabled={saving}
-                  className="mt-5 w-full rounded-full border border-[#A97A3D] bg-[#A97A3D] px-7 py-4 text-[10px] uppercase tracking-[0.28em] text-white transition hover:bg-transparent hover:text-[#A97A3D] disabled:opacity-50"
+                  className="mt-5 w-full rounded-full border border-[#d2a641] bg-[#d2a641] px-7 py-4 text-[10px] uppercase tracking-[0.28em] text-[#181818] transition hover:bg-transparent hover:text-[var(--gold-text)] disabled:opacity-50"
                 >
                   {saving ? "Importing..." : "Approve & Import"}
                 </button>
@@ -604,7 +604,7 @@ export default function GuestManagement({
               <select
                 value={selectedId}
                 onChange={(event) => selectHousehold(event.target.value)}
-                className="w-full border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                className="w-full border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
               >
                 <option value="">Select household...</option>
                 {households.map((household) => (
@@ -627,13 +627,13 @@ export default function GuestManagement({
                   onChange={(event) => setEditName(event.target.value)}
                   aria-label="Invitation name"
                   maxLength={160}
-                  className="border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                  className="border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
                 />
                 <select
                   value={editType}
                   onChange={(event) => setEditType(event.target.value as InvitationType)}
                   aria-label="Invitation type"
-                  className="border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                  className="border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
                 >
                   <option value="day">Day invitation</option>
                   <option value="evening">Evening invitation</option>
@@ -656,7 +656,7 @@ export default function GuestManagement({
                       }
                       aria-label={`Guest ${index + 1} name`}
                       maxLength={160}
-                      className="min-w-0 flex-1 border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                      className="min-w-0 flex-1 border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
                     />
                     <button
                       type="button"
@@ -680,7 +680,7 @@ export default function GuestManagement({
                     { fullName: "", attending: null },
                   ])
                 }
-                className="border-b border-[#A97A3D] pb-1 text-[10px] uppercase tracking-[0.22em] text-[#A97A3D]"
+                className="border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.22em] text-[var(--gold-text)]"
               >
                 Add another guest
               </button>
@@ -689,7 +689,7 @@ export default function GuestManagement({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 rounded-full border border-[#A97A3D] bg-[#A97A3D] px-7 py-4 text-[10px] uppercase tracking-[0.25em] text-white transition hover:bg-transparent hover:text-[#A97A3D] disabled:opacity-50"
+                  className="flex-1 rounded-full border border-[#d2a641] bg-[#d2a641] px-7 py-4 text-[10px] uppercase tracking-[0.25em] text-[#181818] transition hover:bg-transparent hover:text-[var(--gold-text)] disabled:opacity-50"
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </button>

@@ -25,7 +25,7 @@ export default function ThankYouStep({
     <>
       <div
         aria-hidden="true"
-        className="rsvp-success-mark mb-8 flex h-14 w-14 items-center justify-center rounded-full border border-[#A97A3D] text-xl text-[#A97A3D]"
+        className="rsvp-success-mark mb-8 flex h-14 w-14 items-center justify-center rounded-full border border-[#d2a641] text-xl text-[var(--gold-text)]"
       >
         ✓
       </div>
@@ -44,7 +44,7 @@ export default function ThankYouStep({
 
       {!nobodyAttending && (
         <div className="mt-9 w-full max-w-lg border-y border-[#e6e2da] py-6">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-[#A97A3D]">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--gold-text)]">
             We look forward to seeing you
           </p>
 

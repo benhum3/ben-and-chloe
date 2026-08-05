@@ -34,7 +34,7 @@ export default function ResponseStep({
       </p>
 
       <div className="mt-6 w-full max-w-lg border-y border-[#e6e2da] py-5">
-        <p className="text-[10px] uppercase tracking-[0.3em] text-[#A97A3D]">
+        <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--gold-text)]">
           {household.invitation_type === "day"
             ? "Day Invitation"
             : "Evening Invitation"}
@@ -77,7 +77,7 @@ export default function ResponseStep({
         <button
           type="button"
           onClick={onContinue}
-          className="rsvp-action rounded-full border border-[#A97A3D] bg-[#A97A3D] px-6 py-4 text-xs uppercase tracking-[0.3em] text-white hover:bg-transparent hover:text-[#A97A3D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A97A3D] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2]"
+          className="rsvp-action rounded-full border border-[#d2a641] bg-[#d2a641] px-6 py-4 text-xs uppercase tracking-[0.3em] text-[#181818] hover:bg-transparent hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2a641] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2]"
         >
           Continue
         </button>
@@ -85,7 +85,7 @@ export default function ResponseStep({
         <button
           type="button"
           onClick={onReset}
-          className="text-[10px] uppercase tracking-[0.25em] text-neutral-500 transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D]"
+          className="text-[10px] uppercase tracking-[0.25em] text-neutral-500 transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
         >
           This Is Not My Invitation
         </button>

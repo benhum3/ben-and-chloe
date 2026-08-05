@@ -65,7 +65,7 @@ export default function LookupStep({
         <button
           type="submit"
           disabled={isLoading}
-          className="rsvp-action mt-5 w-full rounded-full border border-[#A97A3D] bg-[#A97A3D] px-6 py-4 text-xs uppercase tracking-[0.3em] text-white hover:bg-transparent hover:text-[#A97A3D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A97A3D] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rsvp-action mt-5 w-full rounded-full border border-[#d2a641] bg-[#d2a641] px-6 py-4 text-xs uppercase tracking-[0.3em] text-[#181818] hover:bg-transparent hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2a641] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLoading ? "Finding Invitation..." : "Find My Invitation"}
         </button>
@@ -74,7 +74,7 @@ export default function LookupStep({
           type="button"
           onClick={onBack}
           disabled={isLoading}
-          className="mt-6 text-[10px] uppercase tracking-[0.25em] text-neutral-500 transition duration-300 hover:text-[#A97A3D] focus-visible:outline-none focus-visible:text-[#A97A3D] disabled:opacity-50"
+          className="mt-6 text-[10px] uppercase tracking-[0.25em] text-neutral-500 transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)] disabled:opacity-50"
         >
           Back
         </button>

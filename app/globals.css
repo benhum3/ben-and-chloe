@@ -3,8 +3,14 @@
 :root {
   --background: #f8f6f2;
   --foreground: #181818;
+  --gold: #d2a641;
+  --gold-text: #8a681e;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+}
+
+[data-gold-theme="dark"] {
+  --gold-text: var(--gold);
 }
 
 body {
@@ -32,11 +38,19 @@ html {
 }
 
 .font-serif {
-  font-family: var(--font-serif), serif;
+  font-family:
+    Didot,
+    "Didot LT STD",
+    "Bodoni 72",
+    "Bodoni MT",
+    var(--font-serif),
+    Georgia,
+    serif;
+  font-weight: 400;
 }
 
 ::selection {
-  background: #c9b38a;
+  background: var(--gold);
   color: #181818;
 }
 @keyframes reveal-up {
@@ -165,9 +179,9 @@ html {
 }
 
 .rsvp-control:focus {
-  border-color: #a97a3d;
+  border-color: var(--gold);
   background-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 0 0 3px rgba(169, 122, 61, 0.12);
+  box-shadow: 0 0 0 3px rgba(210, 166, 65, 0.14);
 }
 
 .rsvp-action {

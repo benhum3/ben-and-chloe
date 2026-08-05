@@ -6,21 +6,21 @@ export default function RSVP() {
     <section className="relative overflow-hidden bg-[#f8f6f2] py-20 md:py-28">
       <div
         aria-hidden="true"
-        className="absolute left-1/2 top-1/2 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#A97A3D]/10 md:h-[700px] md:w-[700px]"
+        className="absolute left-1/2 top-1/2 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d2a641]/10 md:h-[700px] md:w-[700px]"
       />
 
       <div
         aria-hidden="true"
-        className="absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#A97A3D]/10 md:h-[520px] md:w-[520px]"
+        className="absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d2a641]/10 md:h-[520px] md:w-[520px]"
       />
 
       <Container>
         <div className="relative z-10 mx-auto max-w-3xl text-center">
-          <p className="text-[10px] uppercase tracking-[0.38em] text-[#A97A3D] md:text-[11px] md:tracking-[0.42em]">
+          <p className="text-[10px] uppercase tracking-[0.38em] text-[var(--gold-text)] md:text-[11px] md:tracking-[0.42em]">
             Kindly Respond
           </p>
 
-          <div className="mx-auto mt-5 h-px w-12 bg-[#A97A3D]" />
+          <div className="mx-auto mt-5 h-px w-12 bg-[#d2a641]" />
 
           <h2 className="mt-7 font-serif text-5xl leading-[0.95] md:text-8xl">
             Will you be joining us?
@@ -49,7 +49,7 @@ export default function RSVP() {
 
           <Link
             href="/rsvp"
-            className="mt-8 inline-flex rounded-full border border-[#A97A3D] bg-[#A97A3D] px-10 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition duration-300 hover:bg-transparent hover:text-[#A97A3D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A97A3D] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2] md:mt-10"
+            className="mt-8 inline-flex rounded-full border border-[#d2a641] bg-[#d2a641] px-10 py-4 text-[11px] uppercase tracking-[0.3em] text-[#181818] transition duration-300 hover:bg-transparent hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d2a641] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f8f6f2] md:mt-10"
           >
             Complete RSVP
           </Link>

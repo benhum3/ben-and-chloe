@@ -47,13 +47,13 @@ export default function Day() {
           {events.map((event) => (
             <div
               key={event.title}
-              className="border-t border-neutral-300 pt-5 transition-colors duration-300 hover:border-[#A97A3D]"
+              className="border-t border-neutral-300 pt-5 transition-colors duration-300 hover:border-[#d2a641]"
             >
               <h3 className="font-serif text-2xl md:text-3xl">
                 {event.title}
               </h3>
 
-              <p className="mt-3 text-[10px] uppercase tracking-[0.3em] text-[#A97A3D] md:text-xs">
+              <p className="mt-3 text-[10px] uppercase tracking-[0.3em] text-[var(--gold-text)] md:text-xs">
                 {event.time}
               </p>
 

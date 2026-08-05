@@ -1,10 +1,10 @@
 import Container from "./Container";
 
 const linkClassName =
-  "mt-5 inline-flex border-b border-[#A97A3D] pb-1 text-[10px] uppercase tracking-[0.26em] text-[#A97A3D] transition-colors duration-300 hover:text-[#181818]";
+  "mt-5 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818]";
 
 const headingLinkClassName =
-  "transition-colors duration-300 hover:text-[#A97A3D]";
+  "transition-colors duration-300 hover:text-[var(--gold-text)]";
 
 export default function Travel() {
   return (
@@ -15,7 +15,7 @@ export default function Travel() {
       <Container>
         <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.35em] text-[#A97A3D] md:text-[11px] md:tracking-[0.38em]">
+            <p className="text-[10px] uppercase tracking-[0.35em] text-[var(--gold-text)] md:text-[11px] md:tracking-[0.38em]">
               Travel & Stay
             </p>
 
@@ -30,7 +30,7 @@ export default function Travel() {
           </div>
 
           <div className="grid gap-8 sm:grid-cols-2 md:gap-12">
-            <article className="border-t border-[#d9d3c9] pt-6 transition-colors duration-300 hover:border-[#A97A3D]">
+            <article className="border-t border-[#d9d3c9] pt-6 transition-colors duration-300 hover:border-[#d2a641]">
               <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-500">
                 Ceremony
               </p>
@@ -46,7 +46,7 @@ export default function Travel() {
                 </a>
               </h3>
 
-              <div className="mt-4 h-px w-12 bg-[#A97A3D]" />
+              <div className="mt-4 h-px w-12 bg-[#d2a641]" />
 
               <p className="mt-4 text-base leading-7 text-neutral-600 md:text-sm">
                 Longton, Lancashire
@@ -67,7 +67,7 @@ export default function Travel() {
               </a>
             </article>
 
-            <article className="border-t border-[#d9d3c9] pt-6 transition-colors duration-300 hover:border-[#A97A3D]">
+            <article className="border-t border-[#d9d3c9] pt-6 transition-colors duration-300 hover:border-[#d2a641]">
               <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-500">
                 Reception
               </p>
@@ -83,7 +83,7 @@ export default function Travel() {
                 </a>
               </h3>
 
-              <div className="mt-4 h-px w-12 bg-[#A97A3D]" />
+              <div className="mt-4 h-px w-12 bg-[#d2a641]" />
 
               <p className="mt-4 text-base leading-7 text-neutral-600 md:text-sm">
                 Chipping Lane, Thornley, Chipping, Preston, PR3 2TB
@@ -99,7 +99,7 @@ export default function Travel() {
               </a>
             </article>
 
-            <article className="border-t border-[#d9d3c9] pt-6 transition-colors duration-300 hover:border-[#A97A3D] sm:col-span-2">
+            <article className="border-t border-[#d9d3c9] pt-6 transition-colors duration-300 hover:border-[#d2a641] sm:col-span-2">
               <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-500">
                 Accommodation
               </p>
@@ -115,7 +115,7 @@ export default function Travel() {
                 </a>
               </h3>
 
-              <div className="mt-4 h-px w-12 bg-[#A97A3D]" />
+              <div className="mt-4 h-px w-12 bg-[#d2a641]" />
 
               <p className="mt-4 max-w-2xl text-base leading-7 text-neutral-600 md:text-sm">
                 Rooms at Longridge House have been reserved for immediate

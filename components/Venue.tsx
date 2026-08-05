@@ -2,6 +2,7 @@ export default function Venue() {
   return (
     <section
       id="venue"
+      data-gold-theme="dark"
       className="bg-[#181818] px-6 py-20 text-[#faf9f7] md:px-20 md:py-28"
     >
       <div className="mx-auto max-w-5xl">
@@ -19,7 +20,7 @@ export default function Venue() {
 </p>
 
         <div className="mt-9 grid gap-7 md:mt-14 md:grid-cols-2 md:gap-10">
-          <div className="border-t border-neutral-700 pt-5 transition-colors duration-300 hover:border-[#A97A3D]">
+          <div className="border-t border-neutral-700 pt-5 transition-colors duration-300 hover:border-[#d2a641]">
             <p className="text-[10px] uppercase tracking-[0.28em] text-neutral-400 md:text-xs">
               Ceremony
             </p>
@@ -34,7 +35,7 @@ export default function Venue() {
             </p>
           </div>
 
-          <div className="border-t border-neutral-700 pt-5 transition-colors duration-300 hover:border-[#A97A3D]">
+          <div className="border-t border-neutral-700 pt-5 transition-colors duration-300 hover:border-[#d2a641]">
             <p className="text-[10px] uppercase tracking-[0.28em] text-neutral-400 md:text-xs">
               Reception
             </p>

@@ -166,7 +166,7 @@ export default function PlanningTasks() {
     <section id="planning" className="scroll-mt-28 border-t border-[#ded9cf] pt-16">
       <div className="grid gap-12 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-[#A97A3D]">
+          <p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-text)]">
             Wedding Planning
           </p>
           <h2 className="mt-4 font-serif text-4xl md:text-6xl">
@@ -185,7 +185,7 @@ export default function PlanningTasks() {
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={progress}
-                className="h-full bg-[#A97A3D] transition-[width] duration-500"
+                className="h-full bg-[#d2a641] transition-[width] duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -198,7 +198,7 @@ export default function PlanningTasks() {
               aria-label="Task title"
               placeholder="Add a planning task"
               maxLength={160}
-              className="w-full border border-[#ded9cf] bg-white/20 px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+              className="w-full border border-[#ded9cf] bg-white/20 px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
             />
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -208,7 +208,7 @@ export default function PlanningTasks() {
                 onChange={(event) =>
                   setCategory(event.target.value as typeof category)
                 }
-                className="border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                className="border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
               >
                 {categories.map((item) => (
                   <option key={item}>{item}</option>
@@ -220,7 +220,7 @@ export default function PlanningTasks() {
                 value={dueDate}
                 aria-label="Task due date"
                 onChange={(event) => setDueDate(event.target.value)}
-                className="border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#A97A3D]"
+                className="border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
               />
             </div>
 
@@ -230,13 +230,13 @@ export default function PlanningTasks() {
               aria-label="Task notes"
               placeholder="Notes (optional)"
               maxLength={1000}
-              className="min-h-24 w-full border border-[#ded9cf] bg-white/20 px-5 py-4 text-sm leading-7 outline-none transition focus:border-[#A97A3D]"
+              className="min-h-24 w-full border border-[#ded9cf] bg-white/20 px-5 py-4 text-sm leading-7 outline-none transition focus:border-[#d2a641]"
             />
 
             <button
               type="submit"
               disabled={saving || !title.trim()}
-              className="w-full rounded-full border border-[#A97A3D] bg-[#A97A3D] px-7 py-4 text-[10px] uppercase tracking-[0.28em] text-white transition duration-300 hover:bg-transparent hover:text-[#A97A3D] disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-full border border-[#d2a641] bg-[#d2a641] px-7 py-4 text-[10px] uppercase tracking-[0.28em] text-[#181818] transition duration-300 hover:bg-transparent hover:text-[var(--gold-text)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Adding Task..." : "Add Task"}
             </button>
@@ -251,7 +251,7 @@ export default function PlanningTasks() {
             <button
               type="button"
               onClick={() => setShowCompleted((current) => !current)}
-              className="text-[10px] uppercase tracking-[0.24em] text-[#A97A3D]"
+              className="text-[10px] uppercase tracking-[0.24em] text-[var(--gold-text)]"
             >
               {showCompleted ? "Hide completed" : "Show completed"}
             </button>
@@ -276,8 +276,8 @@ export default function PlanningTasks() {
                     aria-pressed={task.completed}
                     className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs transition ${
                       task.completed
-                        ? "border-[#A97A3D] bg-[#A97A3D] text-white"
-                        : "border-[#bdb5a8] text-transparent hover:border-[#A97A3D]"
+                        ? "border-[#d2a641] bg-[#d2a641] text-[#181818]"
+                        : "border-[#bdb5a8] text-transparent hover:border-[#d2a641]"
                     }`}
                   >
                     ✓
@@ -289,7 +289,7 @@ export default function PlanningTasks() {
                         <p className={`font-serif text-xl ${task.completed ? "text-neutral-400 line-through" : ""}`}>
                           {task.title}
                         </p>
-                        <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-[#A97A3D]">
+                        <p className="mt-2 text-[10px] uppercase tracking-[0.22em] text-[var(--gold-text)]">
                           {task.category}
                           {task.due_date ? ` · ${formatDueDate(task.due_date)}` : ""}
                         </p>
