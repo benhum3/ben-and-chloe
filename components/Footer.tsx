@@ -35,6 +35,7 @@ export default function Footer() {
           >
             <a
               href="#day"
+              data-wedding-day-practical
               className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               The Day
@@ -42,6 +43,7 @@ export default function Footer() {
 
             <a
               href="#venue"
+              data-before-wedding-day
               className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               Our Celebration
@@ -49,6 +51,7 @@ export default function Footer() {
 
             <a
               href="#travel"
+              data-wedding-day-practical
               className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               Travel
@@ -56,18 +59,43 @@ export default function Footer() {
 
             <a
               href="#faq"
+              data-before-wedding-day
               className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               FAQs
             </a>
 
             <a
+              href="#contact"
+              data-wedding-day-practical
+              className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
+            >
+              Contact
+            </a>
+
+            <a
+              href="#photos"
+              data-photo-navigation
+              className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
+            >
+              Photos
+            </a>
+
+            <a
               href="/rsvp"
+              data-rsvp-before-wedding
               className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
             >
               Respond
             </a>
           </nav>
+
+          <a
+            href="#home"
+            className="mt-10 inline-flex items-center gap-3 border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.28em] text-neutral-300 transition-colors duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
+          >
+            Back to the top <span aria-hidden="true">↑</span>
+          </a>
 
           <div className="mt-14 w-full border-t border-white/10 pt-8">
             <div className="flex flex-col items-center justify-between gap-4 text-[9px] uppercase tracking-[0.22em] text-neutral-600 sm:flex-row">

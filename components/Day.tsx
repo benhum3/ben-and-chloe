@@ -33,7 +33,11 @@ export default function Day() {
   ];
 
   return (
-    <section id="day" className="px-6 py-20 md:px-20 md:py-28">
+    <section
+      id="day"
+      data-wedding-day-practical
+      className="px-6 py-20 md:px-20 md:py-28"
+    >
       <div className="mx-auto max-w-6xl">
         <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-neutral-500 md:mb-4 md:text-xs">
           The Day
@@ -42,6 +46,16 @@ export default function Day() {
         <h2 className="font-serif text-4xl leading-none md:text-7xl">
           Saturday, 19 December
         </h2>
+
+        <a
+          href="/api/calendar"
+          className="mt-6 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818] md:mt-8"
+        >
+          Add the day to your calendar
+          <span className="ml-2" aria-hidden="true">
+            ↓
+          </span>
+        </a>
 
         <div className="mt-10 grid gap-6 md:mt-16 md:grid-cols-2 md:gap-10 xl:grid-cols-3">
           {events.map((event) => (

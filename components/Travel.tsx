@@ -6,10 +6,16 @@ const linkClassName =
 const headingLinkClassName =
   "transition-colors duration-300 hover:text-[var(--gold-text)]";
 
+const CHURCH_MAP = "https://maps.app.goo.gl/igjWWgzQkFk3pheC9";
+const RECEPTION_MAP = "https://maps.app.goo.gl/NrS2D5D9DjbPobhQA";
+const BETWEEN_VENUES =
+  "https://www.google.com/maps/dir/?api=1&origin=St+Andrew%27s+Church%2C+Longton%2C+Lancashire&destination=Longridge+House%2C+Chipping+Lane%2C+Thornley%2C+Preston+PR3+2TB&travelmode=driving";
+
 export default function Travel() {
   return (
     <section
       id="travel"
+      data-wedding-day-practical
       className="scroll-mt-28 bg-[#f4f1eb] py-20 md:py-28"
     >
       <Container>
@@ -37,7 +43,7 @@ export default function Travel() {
 
               <h3 className="mt-3 font-serif text-2xl md:mt-4 md:text-3xl">
                 <a
-                  href="https://maps.app.goo.gl/igjWWgzQkFk3pheC9"
+                  href={CHURCH_MAP}
                   target="_blank"
                   rel="noreferrer"
                   className={headingLinkClassName}
@@ -57,8 +63,14 @@ export default function Travel() {
                 seated before the ceremony begins at 12:30pm.
               </p>
 
+              <p className="mt-4 text-base leading-7 text-neutral-600 md:text-sm">
+                Parking is available on-street along School Lane, which runs
+                down the side of the church. Please park considerately and
+                allow a little extra time to find a space.
+              </p>
+
               <a
-                href="https://maps.app.goo.gl/igjWWgzQkFk3pheC9"
+                href={CHURCH_MAP}
                 target="_blank"
                 rel="noreferrer"
                 className={linkClassName}
@@ -74,7 +86,7 @@ export default function Travel() {
 
               <h3 className="mt-3 font-serif text-2xl md:mt-4 md:text-3xl">
                 <a
-                  href="https://maps.app.goo.gl/NrS2D5D9DjbPobhQA"
+                  href={RECEPTION_MAP}
                   target="_blank"
                   rel="noreferrer"
                   className={headingLinkClassName}
@@ -89,14 +101,56 @@ export default function Travel() {
                 Chipping Lane, Thornley, Chipping, Preston, PR3 2TB
               </p>
 
+              <p className="mt-4 text-base leading-7 text-neutral-600 md:text-sm">
+                The reception follows the church ceremony. Further transport
+                arrangements will be added here once they are confirmed.
+              </p>
+
+              <p className="mt-4 text-base leading-7 text-neutral-600 md:text-sm">
+                On-site parking is available at Longridge House.
+              </p>
+
               <a
-                href="https://maps.app.goo.gl/NrS2D5D9DjbPobhQA"
+                href={RECEPTION_MAP}
                 target="_blank"
                 rel="noreferrer"
                 className={linkClassName}
               >
                 Open in Maps <span className="ml-1">↗</span>
               </a>
+            </article>
+
+            <article className="border-t border-[#d9d3c9] pt-6 transition-colors duration-300 hover:border-[#d2a641] sm:col-span-2">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+                Between the venues
+              </p>
+
+              <h3 className="mt-3 font-serif text-2xl md:mt-4 md:text-3xl">
+                Plan your onward journey
+              </h3>
+
+              <div className="mt-4 h-px w-12 bg-[#d2a641]" />
+
+              <p className="mt-4 max-w-2xl text-base leading-7 text-neutral-600 md:text-sm">
+                You can preview the journey from St Andrew&apos;s Church to
+                Longridge House below. If you intend to use a taxi for the
+                evening, booking it ahead of the wedding is advisable.
+              </p>
+
+              <div className="flex flex-wrap gap-x-7 gap-y-2">
+                <a
+                  href={BETWEEN_VENUES}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={linkClassName}
+                >
+                  View route <span className="ml-1">↗</span>
+                </a>
+
+                <a href="/api/calendar" className={linkClassName}>
+                  Add to calendar <span className="ml-1">↓</span>
+                </a>
+              </div>
             </article>
 
             <article className="border-t border-[#d9d3c9] pt-6 transition-colors duration-300 hover:border-[#d2a641] sm:col-span-2">
@@ -132,6 +186,52 @@ export default function Travel() {
                 Visit Website <span className="ml-1">↗</span>
               </a>
             </article>
+
+            <aside className="border border-[#d9d3c9] bg-[#f8f6f2]/70 p-6 sm:col-span-2 md:p-8">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--gold-text)]">
+                Travel notes
+              </p>
+
+              <ul className="mt-5 grid gap-4 text-base leading-7 text-neutral-600 md:grid-cols-2 md:text-sm">
+                <li>
+                  Allow extra time for a winter journey and arrive at the
+                  church from 12:00pm.
+                </li>
+                <li>
+                  Pre-book evening taxis rather than relying on availability
+                  on the night.
+                </li>
+                <li>Save both venue directions before setting off.</li>
+                <li>
+                  Church parking is on School Lane; reception parking is
+                  available on site.
+                </li>
+              </ul>
+
+              <div className="mt-7 border-t border-[#d9d3c9] pt-6">
+                <p className="text-[10px] uppercase tracking-[0.28em] text-neutral-500">
+                  Local taxi option
+                </p>
+                <p className="mt-3 text-base leading-7 text-neutral-600 md:text-sm">
+                  RS Travel serves Longridge and the surrounding Ribble Valley.
+                  Please contact them directly to check availability and agree
+                  your fare in advance.
+                </p>
+                <div className="flex flex-wrap gap-x-7 gap-y-2">
+                  <a href="tel:+441772702222" className={linkClassName}>
+                    01772 70 22 22
+                  </a>
+                  <a
+                    href="https://www.rs-travel.com/contacts-us/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={linkClassName}
+                  >
+                    RS Travel website <span className="ml-1">↗</span>
+                  </a>
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
       </Container>

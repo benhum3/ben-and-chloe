@@ -3,6 +3,7 @@ export default function Venue() {
     <section
       id="venue"
       data-gold-theme="dark"
+      data-before-wedding-day
       className="bg-[#181818] px-6 py-20 text-[#faf9f7] md:px-20 md:py-28"
     >
       <div className="mx-auto max-w-5xl">

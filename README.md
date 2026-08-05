@@ -43,6 +43,9 @@ The launch-readiness migration:
 - saves each household RSVP atomically so a failed request cannot leave a
   partially updated response.
 
+The wedding photos migration creates the public photo bucket and its private
+metadata table. Apply it before testing or deploying photo uploads.
+
 ## Release checklist
 
 Before pushing a release:

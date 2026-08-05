@@ -1,11 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import Container from "./Container";
 import Monogram from "./Monogram";
 
+type PrimaryAction = "rsvp" | "none" | "photos" | "photos-after";
+
+function subscribeToClock(onChange: () => void) {
+  const interval = window.setInterval(onChange, 60_000);
+  return () => window.clearInterval(interval);
+}
+
+function getPrimaryAction(): PrimaryAction {
+  const preview = new URLSearchParams(window.location.search).get("preview");
+
+  if (preview === "photos") return "photos";
+  if (preview === "after") return "photos-after";
+  if (preview === "final-week") return "none";
+
+  const now = new Date();
+
+  if (now >= new Date("2026-12-20T00:00:00Z")) return "photos-after";
+  if (now >= new Date("2026-12-19T00:00:00Z")) return "photos";
+  if (now >= new Date("2026-09-02T00:00:00+01:00")) return "none";
+  return "rsvp";
+}
+
+function getServerPrimaryAction(): PrimaryAction {
+  return "rsvp";
+}
+
 export default function Navigation() {
+  const primaryAction = useSyncExternalStore(
+    subscribeToClock,
+    getPrimaryAction,
+    getServerPrimaryAction,
+  );
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -86,7 +117,15 @@ export default function Navigation() {
     ["Our Celebration", "#venue"],
     ["Travel", "#travel"],
     ["FAQs", "#faq"],
+    ["Contact", "#contact"],
   ];
+  const photosArePrimary =
+    primaryAction === "photos" || primaryAction === "photos-after";
+  const navigationLinks = primaryAction === "photos-after"
+    ? []
+    : primaryAction === "photos"
+      ? links.filter(([label]) => ["The Day", "Travel", "Contact"].includes(label))
+      : links;
 
   function closeMenu() {
     setMenuOpen(false);
@@ -125,8 +164,8 @@ export default function Navigation() {
               <Monogram size="small" />
             </a>
 
-            <div className="hidden items-center gap-8 md:flex">
-              {links.map(([label, href]) => (
+            <div className="hidden items-center gap-6 md:flex">
+              {navigationLinks.map(([label, href]) => (
                 <a
                   key={label}
                   href={href}
@@ -139,12 +178,24 @@ export default function Navigation() {
               ))}
             </div>
 
-            <a
-              href="/rsvp"
-              className="hidden rounded-full border border-[#d2a641] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[var(--gold-text)] transition-all duration-300 hover:bg-[#d2a641] hover:text-[#181818] md:block"
-            >
-              Respond
-            </a>
+            {primaryAction === "rsvp" && (
+              <a
+                href="/rsvp"
+                data-rsvp-before-wedding
+                className="hidden rounded-full border border-[#d2a641] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[var(--gold-text)] transition-all duration-300 hover:bg-[#d2a641] hover:text-[#181818] md:block"
+              >
+                Respond
+              </a>
+            )}
+
+            {photosArePrimary && (
+              <a
+                href="#photos"
+                className="hidden rounded-full border border-[#d2a641] bg-[#d2a641] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[#181818] transition-all duration-300 hover:bg-transparent hover:text-[var(--gold-text)] md:block"
+              >
+                Share Photos
+              </a>
+            )}
 
             <button
               ref={menuButtonRef}
@@ -207,7 +258,7 @@ export default function Navigation() {
             aria-label="Mobile navigation"
             className="mt-10 flex flex-col items-center gap-7 font-serif text-[2.35rem] leading-none"
           >
-            {links.map(([label, href], index) => (
+            {navigationLinks.map(([label, href], index) => (
               <a
                 key={label}
                 href={href}
@@ -223,18 +274,27 @@ export default function Navigation() {
               </a>
             ))}
 
-            <a
-              href="/rsvp"
-              onClick={closeMenu}
-              className={`mt-4 rounded-full border border-[#d2a641] px-8 py-3.5 text-[11px] uppercase tracking-[0.28em] text-[var(--gold-text)] transition-all duration-500 hover:bg-[#d2a641] hover:text-[#181818] focus-visible:bg-[#d2a641] focus-visible:text-[#181818] focus-visible:outline-none ${
-                menuOpen
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-4 opacity-0"
-              }`}
-              style={{ transitionDelay: "420ms" }}
-            >
-              Respond
-            </a>
+            {primaryAction !== "none" && (
+              <a
+                href={photosArePrimary ? "#photos" : "/rsvp"}
+                data-rsvp-before-wedding={
+                  primaryAction === "rsvp" ? true : undefined
+                }
+                onClick={closeMenu}
+                className={`mt-4 rounded-full border border-[#d2a641] px-8 py-3.5 text-[11px] uppercase tracking-[0.28em] transition-all duration-500 hover:bg-[#d2a641] hover:text-[#181818] focus-visible:bg-[#d2a641] focus-visible:text-[#181818] focus-visible:outline-none ${
+                  photosArePrimary
+                    ? "bg-[#d2a641] text-[#181818]"
+                    : "text-[var(--gold-text)]"
+                } ${
+                  menuOpen
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-4 opacity-0"
+                }`}
+                style={{ transitionDelay: "420ms" }}
+              >
+                {photosArePrimary ? "Share Photos" : "Respond"}
+              </a>
+            )}
           </nav>
 
           <p

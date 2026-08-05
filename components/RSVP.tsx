@@ -3,7 +3,10 @@ import Container from "./Container";
 
 export default function RSVP() {
   return (
-    <section className="relative overflow-hidden bg-[#f8f6f2] py-20 md:py-28">
+    <section
+      data-rsvp-before-wedding
+      className="relative overflow-hidden bg-[#f8f6f2] py-20 md:py-28"
+    >
       <div
         aria-hidden="true"
         className="absolute left-1/2 top-1/2 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#d2a641]/10 md:h-[700px] md:w-[700px]"

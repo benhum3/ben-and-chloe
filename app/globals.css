@@ -53,6 +53,30 @@ html {
   background: var(--gold);
   color: #181818;
 }
+
+html[data-wedding-phase="rsvp-closed"] [data-rsvp-before-wedding],
+html[data-wedding-phase="final-week"] [data-rsvp-before-wedding],
+html[data-wedding-phase="after"] [data-rsvp-before-wedding] {
+  display: none !important;
+}
+
+html[data-photo-phase="open"] [data-before-wedding-day],
+html[data-photo-phase="gallery"] [data-before-wedding-day] {
+  display: none !important;
+}
+
+html[data-wedding-phase="after"] [data-wedding-day-practical] {
+  display: none !important;
+}
+
+[data-photo-navigation] {
+  display: none !important;
+}
+
+html[data-photo-phase="open"] [data-photo-navigation],
+html[data-photo-phase="gallery"] [data-photo-navigation] {
+  display: inline-flex !important;
+}
 @keyframes reveal-up {
   from {
     opacity: 0;

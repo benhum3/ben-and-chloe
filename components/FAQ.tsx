@@ -43,6 +43,7 @@ export default function FAQ() {
     <section
       id="faq"
       data-gold-theme="dark"
+      data-before-wedding-day
       className="scroll-mt-28 bg-[#181818] py-20 text-[#f8f6f2] md:py-28"
     >
       <Container>

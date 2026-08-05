@@ -5,6 +5,7 @@ export default function Hero() {
   return (
     <section
       id="home"
+      data-before-wedding-day
       className="flex min-h-screen flex-col items-center px-6 pb-16 pt-28 text-center md:justify-center md:py-28"
     >
       <div className="reveal-up delay-100 -mb-2 origin-center scale-[0.82] sm:scale-90 md:mb-0 md:scale-100">
@@ -64,6 +65,7 @@ export default function Hero() {
 
         <a
           href="/rsvp"
+          data-rsvp-before-wedding
           className="inline-block min-h-12 border border-[#181818] px-7 py-4 text-[10px] uppercase tracking-[0.28em] transition duration-300 hover:bg-[#181818] hover:text-[#f8f6f2] sm:text-xs md:px-8 md:tracking-[0.3em]"
         >
           Kindly Respond

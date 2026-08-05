@@ -7,6 +7,7 @@ import GuestManagement, {
   type ManagedHousehold,
 } from "@/components/admin/GuestManagement";
 import PlanningTasks from "@/components/admin/PlanningTasks";
+import PhotoManagement from "@/components/admin/PhotoManagement";
 import Monogram from "@/components/Monogram";
 
 type GuestStatus = "all" | "attending" | "declined" | "pending";
@@ -515,6 +516,7 @@ export default function AdminPage() {
         >
           <a href="#overview" className="transition hover:text-[var(--gold-text)]">Overview</a>
           <a href="#planning" className="transition hover:text-[var(--gold-text)]">Planning</a>
+          <a href="#photos" className="transition hover:text-[var(--gold-text)]">Photos</a>
           <a href="#guest-management" className="transition hover:text-[var(--gold-text)]">Add Guests</a>
           <a href="#guests" className="transition hover:text-[var(--gold-text)]">Guests</a>
           <button type="button" onClick={() => void handleLogout()} className="transition hover:text-[var(--gold-text)]">
@@ -611,6 +613,10 @@ export default function AdminPage() {
 
             <div className="mt-20">
               <PlanningTasks />
+            </div>
+
+            <div className="mt-20">
+              <PhotoManagement />
             </div>
 
             <div className="mt-20">
