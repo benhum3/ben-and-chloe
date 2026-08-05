@@ -102,8 +102,8 @@ export default function Travel() {
               </p>
 
               <p className="mt-4 text-base leading-7 text-neutral-600 md:text-sm">
-                The reception follows the church ceremony. Further transport
-                arrangements will be added here once they are confirmed.
+                The reception follows the church ceremony. Please make your
+                own travel arrangements from the church to Longridge House.
               </p>
 
               <p className="mt-4 text-base leading-7 text-neutral-600 md:text-sm">
@@ -187,51 +187,6 @@ export default function Travel() {
               </a>
             </article>
 
-            <aside className="border border-[#d9d3c9] bg-[#f8f6f2]/70 p-6 sm:col-span-2 md:p-8">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--gold-text)]">
-                Travel notes
-              </p>
-
-              <ul className="mt-5 grid gap-4 text-base leading-7 text-neutral-600 md:grid-cols-2 md:text-sm">
-                <li>
-                  Allow extra time for a winter journey and arrive at the
-                  church from 12:00pm.
-                </li>
-                <li>
-                  Pre-book evening taxis rather than relying on availability
-                  on the night.
-                </li>
-                <li>Save both venue directions before setting off.</li>
-                <li>
-                  Church parking is on School Lane; reception parking is
-                  available on site.
-                </li>
-              </ul>
-
-              <div className="mt-7 border-t border-[#d9d3c9] pt-6">
-                <p className="text-[10px] uppercase tracking-[0.28em] text-neutral-500">
-                  Local taxi option
-                </p>
-                <p className="mt-3 text-base leading-7 text-neutral-600 md:text-sm">
-                  RS Travel serves Longridge and the surrounding Ribble Valley.
-                  Please contact them directly to check availability and agree
-                  your fare in advance.
-                </p>
-                <div className="flex flex-wrap gap-x-7 gap-y-2">
-                  <a href="tel:+441772702222" className={linkClassName}>
-                    01772 70 22 22
-                  </a>
-                  <a
-                    href="https://www.rs-travel.com/contacts-us/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className={linkClassName}
-                  >
-                    RS Travel website <span className="ml-1">↗</span>
-                  </a>
-                </div>
-              </div>
-            </aside>
           </div>
         </div>
       </Container>

@@ -115,7 +115,7 @@ export default function WeddingMode() {
               <a
                 key={label}
                 href={href}
-                className="flex min-h-12 items-center justify-center rounded-full border border-white/20 px-4 py-3 text-center text-[10px] uppercase tracking-[0.24em] transition hover:border-[#d2a641] hover:text-[var(--gold-text)]"
+                className="flex min-h-12 items-center justify-center rounded-full border border-[#d2a641] px-4 py-3 text-center text-[10px] uppercase tracking-[0.24em] text-[var(--gold-text)] transition hover:bg-[#d2a641] hover:text-[#181818]"
               >
                 {label}
               </a>

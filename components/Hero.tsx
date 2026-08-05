@@ -66,7 +66,7 @@ export default function Hero() {
         <a
           href="/rsvp"
           data-rsvp-before-wedding
-          className="inline-block min-h-12 border border-[#181818] px-7 py-4 text-[10px] uppercase tracking-[0.28em] transition duration-300 hover:bg-[#181818] hover:text-[#f8f6f2] sm:text-xs md:px-8 md:tracking-[0.3em]"
+          className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#d2a641] bg-[#d2a641] px-7 py-4 text-[10px] uppercase tracking-[0.28em] text-[#181818] transition duration-300 hover:bg-transparent hover:text-[var(--gold-text)] sm:text-xs md:px-8 md:tracking-[0.3em]"
         >
           Kindly Respond
         </a>

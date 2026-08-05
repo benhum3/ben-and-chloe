@@ -233,14 +233,14 @@ export default function PhotoGallery() {
                     <button
                       type="button"
                       onClick={() => cameraInputRef.current?.click()}
-                      className="min-h-12 flex-1 rounded-full bg-[#d2a641] px-6 py-3 text-[10px] uppercase tracking-[0.26em] text-[#181818] transition hover:bg-[#e0bb65]"
+                      className="min-h-12 flex-1 rounded-full border border-[#d2a641] bg-[#d2a641] px-6 py-3 text-[10px] uppercase tracking-[0.26em] text-[#181818] transition hover:bg-transparent hover:text-[var(--gold-text)]"
                     >
                       Take a photo
                     </button>
                     <button
                       type="button"
                       onClick={() => libraryInputRef.current?.click()}
-                      className="min-h-12 flex-1 rounded-full border border-white/25 px-6 py-3 text-[10px] uppercase tracking-[0.26em] transition hover:border-[#d2a641] hover:text-[var(--gold-text)]"
+                      className="min-h-12 flex-1 rounded-full border border-[#d2a641] px-6 py-3 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition hover:bg-[#d2a641] hover:text-[#181818]"
                     >
                       Choose photos
                     </button>
@@ -326,7 +326,7 @@ export default function PhotoGallery() {
                         type="button"
                         disabled={uploading}
                         onClick={() => void uploadPhotos()}
-                        className="mt-5 min-h-12 w-full rounded-full bg-[#d2a641] px-6 py-3 text-[10px] uppercase tracking-[0.26em] text-[#181818] transition enabled:hover:bg-[#e0bb65] disabled:cursor-wait disabled:opacity-60"
+                        className="mt-5 min-h-12 w-full rounded-full border border-[#d2a641] bg-[#d2a641] px-6 py-3 text-[10px] uppercase tracking-[0.26em] text-[#181818] transition enabled:hover:bg-transparent enabled:hover:text-[var(--gold-text)] disabled:cursor-wait disabled:opacity-60"
                       >
                         {uploading ? "Sharing photos…" : "Share with everyone"}
                       </button>
