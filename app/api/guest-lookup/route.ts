@@ -43,29 +43,85 @@ export async function POST(request: Request) {
       .toLowerCase()
       .replace(/\s+/g, " ");
 
-    const { data: household, error: householdError } =
-      await supabaseAdmin
-        .from("households")
-        .select(
-          `
-            id,
-            invitation_name,
-            invitation_type,
-            song_request,
-            message,
-            submitted_at
-          `,
-        )
-        .eq("search_name", searchName)
-        .maybeSingle();
+    const householdFields = `
+      id,
+      invitation_name,
+      invitation_type,
+      song_request,
+      message,
+      submitted_at
+    `;
 
-    if (householdError) {
-      console.error("Household lookup failed:", householdError);
+    const householdResult = await supabaseAdmin
+      .from("households")
+      .select(householdFields)
+      .eq("search_name", searchName)
+      .maybeSingle();
+
+    if (householdResult.error) {
+      console.error("Household lookup failed:", householdResult.error);
 
       return NextResponse.json(
         { error: "We could not check your invitation. Please try again." },
         { status: 500 },
       );
+    }
+
+    let household = householdResult.data;
+
+    if (!household) {
+      const escapedName = searchName.replace(/[\\%_]/g, "\\$&");
+      const { data: matchingGuests, error: matchingGuestsError } =
+        await supabaseAdmin
+          .from("guests")
+          .select("household_id")
+          .ilike("full_name", escapedName)
+          .limit(10);
+
+      if (matchingGuestsError) {
+        console.error("Guest name lookup failed:", matchingGuestsError);
+
+        return NextResponse.json(
+          { error: "We could not check your invitation. Please try again." },
+          { status: 500 },
+        );
+      }
+
+      const householdIds = [
+        ...new Set((matchingGuests ?? []).map((guest) => guest.household_id)),
+      ];
+
+      if (householdIds.length > 1) {
+        return NextResponse.json(
+          {
+            error:
+              "We found more than one invitation under that name. Please enter the full household name shown on your invitation.",
+          },
+          { status: 409 },
+        );
+      }
+
+      if (householdIds.length === 1) {
+        const resolvedHouseholdResult = await supabaseAdmin
+          .from("households")
+          .select(householdFields)
+          .eq("id", householdIds[0])
+          .maybeSingle();
+
+        if (resolvedHouseholdResult.error) {
+          console.error(
+            "Guest household lookup failed:",
+            resolvedHouseholdResult.error,
+          );
+
+          return NextResponse.json(
+            { error: "We could not load your invitation. Please try again." },
+            { status: 500 },
+          );
+        }
+
+        household = resolvedHouseholdResult.data;
+      }
     }
 
     if (!household) {
