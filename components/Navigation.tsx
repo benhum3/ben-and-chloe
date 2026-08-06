@@ -7,6 +7,7 @@ import FloatingMonogram, {
   getMonogramFlightProgress,
 } from "./FloatingMonogram";
 import Monogram from "./Monogram";
+import { isRsvpClosed } from "@/lib/wedding-schedule";
 
 type PrimaryAction = "rsvp" | "none" | "photos" | "photos-after";
 
@@ -28,7 +29,7 @@ function getPrimaryAction(): PrimaryAction {
 
   if (now >= new Date("2026-12-20T00:00:00Z")) return "photos-after";
   if (now >= new Date("2026-12-19T00:00:00Z")) return "photos";
-  if (now >= new Date("2026-10-01T00:00:00+01:00")) return "none";
+  if (isRsvpClosed(now)) return "none";
   return "rsvp";
 }
 

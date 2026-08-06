@@ -28,12 +28,12 @@ export default function LookupStep({
       </h1>
 
       <p className="mt-8 max-w-lg text-sm leading-8 text-neutral-600">
-        Please enter the name exactly as it appears on your wedding invitation.
+        Enter the full name of any guest included on your invitation.
       </p>
 
       <form onSubmit={onSubmit} className="mt-12 w-full max-w-md">
         <label htmlFor="guest-name" className="sr-only">
-          Name on invitation
+          Your full name
         </label>
 
         <input

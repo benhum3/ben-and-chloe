@@ -2,6 +2,8 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 
+import { isRsvpClosed } from "@/lib/wedding-schedule";
+
 type WeddingPhase =
   | "normal"
   | "rsvp-closed"
@@ -10,7 +12,6 @@ type WeddingPhase =
   | "after";
 
 function getWeddingPhase(now: Date): WeddingPhase {
-  const rsvpClose = new Date("2026-10-01T00:00:00+01:00");
   const finalWeek = new Date("2026-12-12T00:00:00Z");
   const weddingStart = new Date("2026-12-19T00:00:00Z");
   const weddingEnd = new Date("2026-12-20T00:00:00Z");
@@ -18,7 +19,7 @@ function getWeddingPhase(now: Date): WeddingPhase {
   if (now >= weddingEnd) return "after";
   if (now >= weddingStart) return "wedding-day";
   if (now >= finalWeek) return "final-week";
-  if (now >= rsvpClose) return "rsvp-closed";
+  if (isRsvpClosed(now)) return "rsvp-closed";
   return "normal";
 }
 

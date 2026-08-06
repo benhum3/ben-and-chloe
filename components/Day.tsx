@@ -2,32 +2,32 @@ export default function Day() {
   const events = [
     {
       title: "Guest Arrival",
-      time: "12:00 PM",
+      time: "12:00pm",
       detail: "Please arrive in good time before the ceremony begins.",
     },
     {
       title: "Ceremony Begins",
-      time: "12:30 PM",
+      time: "12:30pm",
       detail: "St Andrew's Church",
     },
     {
       title: "Reception Drinks",
-      time: "2:00 PM",
+      time: "2:00pm",
       detail: "Longridge House",
     },
     {
       title: "Wedding Breakfast",
-      time: "4:00 PM",
+      time: "4:00pm",
       detail: "Dinner and speeches",
     },
     {
       title: "Evening Reception",
-      time: "7:00 PM",
+      time: "7:00pm",
       detail: "Music, drinks and dancing",
     },
     {
       title: "Carriages",
-      time: "12:00 AM",
+      time: "Midnight",
       detail: "Time to say goodbye.",
     },
   ];
@@ -36,7 +36,7 @@ export default function Day() {
     <section
       id="day"
       data-wedding-day-practical
-      className="px-6 py-20 md:px-20 md:py-28"
+      className="scroll-mt-28 px-6 py-20 md:px-20 md:py-28"
     >
       <div className="mx-auto max-w-6xl">
         <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-neutral-500 md:mb-4 md:text-xs">
@@ -49,7 +49,7 @@ export default function Day() {
 
         <a
           href="/api/calendar"
-          className="mt-6 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818] md:mt-8"
+          className="mt-6 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] md:mt-8"
         >
           Add the day to your calendar
           <span className="ml-2" aria-hidden="true">

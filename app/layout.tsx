@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 
+const siteUrl = "https://www.humphreywedding.co.uk";
+
 const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
   subsets: ["latin"],
@@ -14,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://humphreywedding.co.uk"),
+  metadataBase: new URL(siteUrl),
   title: "Benjamin & Chloe | 19 December 2026",
   description:
     "Join Benjamin and Chloe as they celebrate their wedding on 19 December 2026.",
@@ -29,6 +31,21 @@ export const metadata: Metadata = {
       "Join Benjamin and Chloe as they celebrate their wedding on 19 December 2026.",
     siteName: "Benjamin & Chloe",
     locale: "en_GB",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Benjamin and Chloe — 19 December 2026",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Benjamin & Chloe | 19 December 2026",
+    description:
+      "Join Benjamin and Chloe as they celebrate their wedding on 19 December 2026.",
+    images: ["/og.png"],
   },
 };
 
@@ -36,6 +53,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  colorScheme: "light",
+  themeColor: "#f8f6f2",
 };
 
 export default function RootLayout({
@@ -44,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en-GB" data-scroll-behavior="smooth">
       <body className={`${cormorant.variable} ${inter.variable}`}>
         {children}
       </body>

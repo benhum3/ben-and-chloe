@@ -7,6 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin", "/api/", "/rsvp"],
     },
-    host: "https://humphreywedding.co.uk",
+    sitemap: "https://www.humphreywedding.co.uk/sitemap.xml",
+    host: "https://www.humphreywedding.co.uk",
   };
 }

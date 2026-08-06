@@ -1,10 +1,10 @@
 import Container from "./Container";
 
 const linkClassName =
-  "mt-5 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818]";
+  "mt-5 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641]";
 
 const headingLinkClassName =
-  "transition-colors duration-300 hover:text-[var(--gold-text)]";
+  "rounded-sm transition-colors duration-300 hover:text-[var(--gold-text)] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641]";
 
 const CHURCH_MAP = "https://maps.app.goo.gl/igjWWgzQkFk3pheC9";
 const RECEPTION_MAP = "https://maps.app.goo.gl/NrS2D5D9DjbPobhQA";

@@ -80,7 +80,7 @@ export default function FAQ() {
                     onClick={() => setOpenQuestion(isOpen ? null : index)}
                     aria-expanded={isOpen}
                     aria-controls={answerId}
-                    className="group flex w-full items-center justify-between gap-6 py-6 text-left md:gap-8 md:py-7"
+                    className="group flex w-full items-center justify-between gap-6 py-6 text-left focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] md:gap-8 md:py-7"
                   >
                     <span className="font-serif text-2xl leading-tight transition-colors duration-300 group-hover:text-[var(--gold-text)] md:text-3xl">
                       {item.question}

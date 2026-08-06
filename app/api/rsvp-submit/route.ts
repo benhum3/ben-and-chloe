@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { consumeRateLimit } from "@/lib/rate-limit";
+import { isRsvpClosed } from "@/lib/wedding-schedule";
 
 type GuestResponse = {
   id: string;
@@ -37,6 +38,16 @@ export async function POST(request: Request) {
           status: 429,
           headers: { "Retry-After": String(rateLimit.retryAfter) },
         },
+      );
+    }
+
+    if (isRsvpClosed()) {
+      return NextResponse.json(
+        {
+          error:
+            "The RSVP deadline has passed. Please contact Benjamin and Chloe if your plans have changed.",
+        },
+        { status: 410 },
       );
     }
 

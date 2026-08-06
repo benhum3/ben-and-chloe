@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { consumeRateLimit } from "@/lib/rate-limit";
+import { isRsvpClosed } from "@/lib/wedding-schedule";
 
 type LookupRequest = {
   name?: unknown;
@@ -25,6 +26,16 @@ export async function POST(request: Request) {
       );
     }
 
+    if (isRsvpClosed()) {
+      return NextResponse.json(
+        {
+          error:
+            "The RSVP deadline has passed. Please contact Benjamin and Chloe if your plans have changed.",
+        },
+        { status: 410 },
+      );
+    }
+
     const body = (await request.json()) as LookupRequest;
 
     if (
@@ -33,7 +44,7 @@ export async function POST(request: Request) {
       body.name.length > 160
     ) {
       return NextResponse.json(
-        { error: "Please enter the name shown on your invitation." },
+        { error: "Please enter your full name." },
         { status: 400 },
       );
     }
