@@ -42,7 +42,7 @@ export default function RSVP() {
             </p>
 
             <p className="mt-2 font-serif text-2xl text-[#181818]">
-              1 September 2026
+              30 September 2026
             </p>
 
             <p className="mt-3 text-sm text-neutral-500">

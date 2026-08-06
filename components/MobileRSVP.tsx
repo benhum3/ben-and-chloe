@@ -16,7 +16,7 @@ export default function MobileRSVP() {
       <div className="flex items-center gap-3">
         <a href="/rsvp" className="min-w-0 flex-1 px-2 py-1">
           <span className="block text-[9px] uppercase tracking-[0.28em] text-neutral-400">
-            RSVP by 1 September
+            RSVP by 30 September
           </span>
           <span className="mt-1 block font-serif text-xl">Kindly respond</span>
         </a>

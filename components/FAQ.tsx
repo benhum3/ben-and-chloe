@@ -32,7 +32,7 @@ const questions = [
   {
     question: "When should I respond by?",
     answer:
-      "Please submit your RSVP by 1 September 2026. You can return to the RSVP page later if you need to update your response.",
+      "Please submit your RSVP by 30 September 2026. You can return to the RSVP page later if you need to update your response.",
   },
 ];
 

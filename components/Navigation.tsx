@@ -3,9 +3,14 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import Container from "./Container";
+import FloatingMonogram, {
+  getMonogramFlightProgress,
+} from "./FloatingMonogram";
 import Monogram from "./Monogram";
 
 type PrimaryAction = "rsvp" | "none" | "photos" | "photos-after";
+
+const SECTION_IDS = ["day", "venue", "travel", "faq", "contact"];
 
 function subscribeToClock(onChange: () => void) {
   const interval = window.setInterval(onChange, 60_000);
@@ -23,7 +28,7 @@ function getPrimaryAction(): PrimaryAction {
 
   if (now >= new Date("2026-12-20T00:00:00Z")) return "photos-after";
   if (now >= new Date("2026-12-19T00:00:00Z")) return "photos";
-  if (now >= new Date("2026-09-02T00:00:00+01:00")) return "none";
+  if (now >= new Date("2026-10-01T00:00:00+01:00")) return "none";
   return "rsvp";
 }
 
@@ -40,13 +45,37 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [navReveal, setNavReveal] = useState(0);
+  const [activeSection, setActiveSection] = useState("");
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const sections = SECTION_IDS.map((id) => document.getElementById(id)).filter(
+      (section): section is HTMLElement => Boolean(section),
+    );
+
     const onScroll = () => {
-      setScrolled(window.scrollY > 24);
+      const monogramProgress = getMonogramFlightProgress(
+        window.scrollY,
+        window.innerHeight,
+      );
+      const revealProgress = Math.min(
+        Math.max((monogramProgress - 0.48) / 0.52, 0),
+        1,
+      );
+
+      setScrolled(monogramProgress > 0.48);
+      setNavReveal(revealProgress);
+
+      const readingLine = window.innerHeight * 0.42;
+      const currentSection = sections.find((section) => {
+        const bounds = section.getBoundingClientRect();
+        return bounds.top <= readingLine && bounds.bottom > readingLine;
+      });
+
+      setActiveSection(currentSection?.id ?? "");
 
       const scrollableHeight =
         document.documentElement.scrollHeight - window.innerHeight;
@@ -133,6 +162,8 @@ export default function Navigation() {
 
   return (
     <>
+      <FloatingMonogram />
+
       <nav
         className={`fixed left-0 top-0 z-50 w-full transition-all duration-500 ${
           scrolled ? "py-3" : "py-5"
@@ -150,30 +181,41 @@ export default function Navigation() {
 
         <Container>
           <div
-            className={`flex items-center justify-between transition-all duration-500 ${
-              scrolled
-                ? "rounded-xl border border-[#e6e2da] bg-[#f8f6f2]/85 px-5 py-4 shadow-sm backdrop-blur-md"
-                : "border border-transparent bg-transparent px-5 py-4"
+            className={`flex items-center justify-between rounded-xl border px-5 py-4 backdrop-blur-md transition-all duration-500 ${
+              scrolled ? "shadow-sm" : "shadow-none"
             }`}
+            style={{
+              backgroundColor: `rgba(248, 246, 242, ${navReveal * 0.85})`,
+              borderColor: `rgba(230, 226, 218, ${navReveal})`,
+            }}
           >
-            <a
-              href="#home"
-              aria-label="Benjamin and Chloe"
-              className="transition-transform duration-300 hover:scale-105"
-            >
-              <Monogram size="small" />
-            </a>
+            <div
+              id="nav-monogram-target"
+              aria-hidden="true"
+              className="aspect-[379/192] w-[4.75rem] shrink-0 sm:w-20"
+            />
 
             <div className="hidden items-center gap-6 md:flex">
               {navigationLinks.map(([label, href]) => (
                 <a
                   key={label}
                   href={href}
-                  className="group relative text-[11px] uppercase tracking-[0.28em] text-neutral-500 transition hover:text-[#181818]"
+                  aria-current={
+                    activeSection === href.slice(1) ? "location" : undefined
+                  }
+                  className={`group relative rounded-sm text-[11px] uppercase tracking-[0.28em] transition focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] ${
+                    activeSection === href.slice(1)
+                      ? "text-[#181818]"
+                      : "text-neutral-500 hover:text-[#181818]"
+                  }`}
                 >
                   {label}
 
-                  <span className="absolute -bottom-2 left-0 h-px w-0 bg-[#d2a641] transition-all duration-300 group-hover:w-full" />
+                  <span
+                    className={`absolute -bottom-2 left-0 h-px bg-[#d2a641] transition-all duration-300 group-hover:w-full ${
+                      activeSection === href.slice(1) ? "w-full" : "w-0"
+                    }`}
+                  />
                 </a>
               ))}
             </div>
@@ -182,7 +224,7 @@ export default function Navigation() {
               <a
                 href="/rsvp"
                 data-rsvp-before-wedding
-                className="hidden rounded-full border border-[#d2a641] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[var(--gold-text)] transition-all duration-300 hover:bg-[#d2a641] hover:text-[#181818] md:block"
+                className="hidden rounded-full border border-[#d2a641] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[var(--gold-text)] transition-all duration-300 hover:bg-[#d2a641] hover:text-[#181818] focus-visible:bg-[#d2a641] focus-visible:text-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] md:block"
               >
                 Respond
               </a>
@@ -191,7 +233,7 @@ export default function Navigation() {
             {photosArePrimary && (
               <a
                 href="#photos"
-                className="hidden rounded-full border border-[#d2a641] bg-[#d2a641] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[#181818] transition-all duration-300 hover:bg-transparent hover:text-[var(--gold-text)] md:block"
+                className="hidden rounded-full border border-[#d2a641] bg-[#d2a641] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[#181818] transition-all duration-300 hover:bg-transparent hover:text-[var(--gold-text)] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] md:block"
               >
                 Share Photos
               </a>
@@ -204,7 +246,7 @@ export default function Navigation() {
               aria-label="Open navigation menu"
               aria-expanded={menuOpen}
               aria-controls="mobile-navigation"
-              className="min-h-11 min-w-11 text-[11px] uppercase tracking-[0.28em] text-neutral-600 md:hidden"
+              className="min-h-11 min-w-11 rounded-sm text-[11px] uppercase tracking-[0.28em] text-neutral-600 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[#d2a641] md:hidden"
             >
               Menu
             </button>
@@ -263,7 +305,14 @@ export default function Navigation() {
                 key={label}
                 href={href}
                 onClick={closeMenu}
+                aria-current={
+                  activeSection === href.slice(1) ? "location" : undefined
+                }
                 className={`transition-all duration-500 hover:text-[var(--gold-text)] focus-visible:text-[var(--gold-text)] focus-visible:outline-none ${
+                  activeSection === href.slice(1)
+                    ? "text-[var(--gold-text)]"
+                    : ""
+                } ${
                   menuOpen
                     ? "translate-y-0 opacity-100"
                     : "translate-y-4 opacity-0"

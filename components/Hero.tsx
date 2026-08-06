@@ -1,5 +1,4 @@
 import Countdown from "./Countdown";
-import Monogram from "./Monogram";
 
 export default function Hero() {
   return (
@@ -9,7 +8,13 @@ export default function Hero() {
       className="flex min-h-screen flex-col items-center px-6 pb-16 pt-28 text-center md:justify-center md:py-28"
     >
       <div className="reveal-up delay-100 -mb-2 origin-center scale-[0.82] sm:scale-90 md:mb-0 md:scale-100">
-        <Monogram />
+        <div className="mb-12 flex justify-center">
+          <div
+            id="hero-monogram-target"
+            aria-hidden="true"
+            className="aspect-[379/192] w-48 sm:w-52 md:w-56"
+          />
+        </div>
       </div>
 
       <p className="reveal-up delay-200 mb-5 text-[10px] uppercase tracking-[0.36em] text-neutral-500 sm:text-xs md:mb-8 md:tracking-[0.42em]">
