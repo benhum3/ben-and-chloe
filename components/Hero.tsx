@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import Countdown from "./Countdown";
 
 export default function Hero() {
@@ -13,7 +15,17 @@ export default function Hero() {
             id="hero-monogram-target"
             aria-hidden="true"
             className="aspect-[379/192] w-48 sm:w-52 md:w-56"
-          />
+          >
+            <Image
+              src="/brand/benjamin-chloe-monogram.svg"
+              alt=""
+              width={379}
+              height={192}
+              loading="eager"
+              unoptimized
+              className="h-full w-full object-contain"
+            />
+          </div>
         </div>
       </div>
 

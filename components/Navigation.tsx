@@ -1,17 +1,26 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import Container from "./Container";
-import FloatingMonogram, {
-  getMonogramFlightProgress,
-} from "./FloatingMonogram";
 import Monogram from "./Monogram";
 import { isRsvpClosed } from "@/lib/wedding-schedule";
 
 type PrimaryAction = "rsvp" | "none" | "photos" | "photos-after";
 
 const SECTION_IDS = ["day", "venue", "travel", "faq", "contact"];
+const MONOGRAM_REVEAL_DELAY = 40;
+
+function getMonogramRevealProgress(scrollY: number, viewportHeight: number) {
+  const revealDistance = Math.min(Math.max(viewportHeight * 0.32, 190), 320);
+  const rawProgress = Math.min(
+    Math.max((scrollY - MONOGRAM_REVEAL_DELAY) / revealDistance, 0),
+    1,
+  );
+
+  return 1 - Math.pow(1 - rawProgress, 3);
+}
 
 function subscribeToClock(onChange: () => void) {
   const interval = window.setInterval(onChange, 60_000);
@@ -58,7 +67,7 @@ export default function Navigation() {
     );
 
     const onScroll = () => {
-      const monogramProgress = getMonogramFlightProgress(
+      const monogramProgress = getMonogramRevealProgress(
         window.scrollY,
         window.innerHeight,
       );
@@ -163,8 +172,6 @@ export default function Navigation() {
 
   return (
     <>
-      <FloatingMonogram />
-
       <nav
         className={`fixed left-0 top-0 z-50 w-full transition-all duration-500 ${
           scrolled ? "py-3" : "py-5"
@@ -192,9 +199,31 @@ export default function Navigation() {
           >
             <div
               id="nav-monogram-target"
-              aria-hidden="true"
-              className="aspect-[379/192] w-[4.75rem] shrink-0 sm:w-20"
-            />
+              className="relative aspect-[379/192] w-[4.75rem] shrink-0 sm:w-20"
+            >
+              <a
+                href="#home"
+                aria-label="Benjamin and Chloe — back to the top"
+                aria-hidden={navReveal <= 0.8}
+                tabIndex={navReveal > 0.8 ? 0 : -1}
+                className="absolute inset-0 block origin-left transition-[opacity,transform,filter] duration-500 ease-out hover:brightness-90 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641]"
+                style={{
+                  opacity: navReveal,
+                  transform: `translate3d(0, ${(1 - navReveal) * -8}px, 0) scale(${0.92 + navReveal * 0.08})`,
+                  pointerEvents: navReveal > 0.8 ? "auto" : "none",
+                }}
+              >
+                <Image
+                  src="/brand/benjamin-chloe-monogram.svg"
+                  alt=""
+                  width={379}
+                  height={192}
+                  loading="eager"
+                  unoptimized
+                  className="h-full w-full object-contain"
+                />
+              </a>
+            </div>
 
             <div className="hidden items-center gap-6 md:flex">
               {navigationLinks.map(([label, href]) => (

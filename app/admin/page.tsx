@@ -8,6 +8,7 @@ import GuestManagement, {
 } from "@/components/admin/GuestManagement";
 import PlanningTasks from "@/components/admin/PlanningTasks";
 import PhotoManagement from "@/components/admin/PhotoManagement";
+import SeatingPlanner from "@/components/admin/SeatingPlanner";
 import Monogram from "@/components/Monogram";
 
 type GuestStatus = "all" | "attending" | "declined" | "pending";
@@ -516,11 +517,12 @@ export default function AdminPage() {
         >
           <a href="#overview" className="transition hover:text-[var(--gold-text)]">Overview</a>
           <a href="#planning" className="transition hover:text-[var(--gold-text)]">Planning</a>
+          <a href="#tables" className="transition hover:text-[var(--gold-text)]">Tables</a>
           <a href="#photos" className="transition hover:text-[var(--gold-text)]">Photos</a>
           <a href="#guest-management" className="transition hover:text-[var(--gold-text)]">Add Guests</a>
           <a href="#guests" className="transition hover:text-[var(--gold-text)]">Guests</a>
           <button type="button" onClick={() => void handleLogout()} className="transition hover:text-[var(--gold-text)]">
-            Sign Out
+            SIGN OUT
           </button>
         </nav>
 
@@ -613,6 +615,10 @@ export default function AdminPage() {
 
             <div className="mt-20">
               <PlanningTasks />
+            </div>
+
+            <div className="mt-20">
+              <SeatingPlanner guests={dashboardData.guests} />
             </div>
 
             <div className="mt-20">
