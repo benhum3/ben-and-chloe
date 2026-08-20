@@ -68,6 +68,13 @@ export default function ThankYouStep({
           <p className="mt-2 text-sm text-neutral-500">
             Saturday, 19 December 2026
           </p>
+
+          <a
+            href={`/api/calendar?type=${invitationType}`}
+            className="mt-5 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.24em] text-[var(--gold-text)] transition hover:text-[#181818]"
+          >
+            Add {invitationType} invitation to calendar
+          </a>
         </div>
       )}
 

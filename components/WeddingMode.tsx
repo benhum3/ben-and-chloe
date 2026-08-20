@@ -82,7 +82,7 @@ export default function WeddingMode() {
     ["Directions", "#travel"],
     ["Contact", "#contact"],
     ...(phase === "wedding-day" ? [["Photos", "#photos"]] : []),
-    ["Calendar", "/api/calendar"],
+    ["Calendars", "#day"],
   ];
 
   return (

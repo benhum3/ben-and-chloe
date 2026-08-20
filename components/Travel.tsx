@@ -185,8 +185,12 @@ export default function Travel() {
                   View route <ExternalLinkIcon />
                 </a>
 
-                <a href="/api/calendar" className={linkClassName}>
-                  Add to calendar <DownloadIcon />
+                <a href="/api/calendar?type=day" className={linkClassName}>
+                  Day guest calendar <DownloadIcon />
+                </a>
+
+                <a href="/api/calendar?type=evening" className={linkClassName}>
+                  Evening guest calendar <DownloadIcon />
                 </a>
               </div>
             </article>
