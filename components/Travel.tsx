@@ -1,7 +1,7 @@
 import Container from "./Container";
 
 const linkClassName =
-  "mt-5 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641]";
+  "mt-5 inline-flex items-center gap-1.5 border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641]";
 
 const headingLinkClassName =
   "rounded-sm transition-colors duration-300 hover:text-[var(--gold-text)] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641]";
@@ -10,6 +10,44 @@ const CHURCH_MAP = "https://maps.app.goo.gl/igjWWgzQkFk3pheC9";
 const RECEPTION_MAP = "https://maps.app.goo.gl/NrS2D5D9DjbPobhQA";
 const BETWEEN_VENUES =
   "https://www.google.com/maps/dir/?api=1&origin=St+Andrew%27s+Church%2C+Longton%2C+Lancashire&destination=Longridge+House%2C+Chipping+Lane%2C+Thornley%2C+Preston+PR3+2TB&travelmode=driving";
+
+function ExternalLinkIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 12 12"
+      fill="none"
+      className="h-3 w-3 shrink-0"
+    >
+      <path
+        d="M3 9 9 3M4 3h5v5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 12 12"
+      fill="none"
+      className="h-3 w-3 shrink-0"
+    >
+      <path
+        d="M6 1.75v7M3.5 6.75 6 9.25l2.5-2.5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function Travel() {
   return (
@@ -75,7 +113,7 @@ export default function Travel() {
                 rel="noreferrer"
                 className={linkClassName}
               >
-                Open in Maps <span className="ml-1">↗</span>
+                Open in Maps <ExternalLinkIcon />
               </a>
             </article>
 
@@ -116,7 +154,7 @@ export default function Travel() {
                 rel="noreferrer"
                 className={linkClassName}
               >
-                Open in Maps <span className="ml-1">↗</span>
+                Open in Maps <ExternalLinkIcon />
               </a>
             </article>
 
@@ -144,11 +182,11 @@ export default function Travel() {
                   rel="noreferrer"
                   className={linkClassName}
                 >
-                  View route <span className="ml-1">↗</span>
+                  View route <ExternalLinkIcon />
                 </a>
 
                 <a href="/api/calendar" className={linkClassName}>
-                  Add to calendar <span className="ml-1">↓</span>
+                  Add to calendar <DownloadIcon />
                 </a>
               </div>
             </article>
@@ -183,7 +221,7 @@ export default function Travel() {
                 rel="noreferrer"
                 className={linkClassName}
               >
-                Visit Website <span className="ml-1">↗</span>
+                Visit Website <ExternalLinkIcon />
               </a>
             </article>
 

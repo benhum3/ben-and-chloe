@@ -49,12 +49,23 @@ export default function Day() {
 
         <a
           href="/api/calendar"
-          className="mt-6 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] md:mt-8"
+          className="mt-6 inline-flex items-center gap-2 border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition-colors duration-300 hover:text-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] md:mt-8"
         >
           Add the day to your calendar
-          <span className="ml-2" aria-hidden="true">
-            ↓
-          </span>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 12 12"
+            fill="none"
+            className="h-3 w-3 shrink-0"
+          >
+            <path
+              d="M6 1.75v7M3.5 6.75 6 9.25l2.5-2.5"
+              stroke="currentColor"
+              strokeWidth="1.25"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </a>
 
         <div className="mt-10 grid gap-6 md:mt-16 md:grid-cols-2 md:gap-10 xl:grid-cols-3">

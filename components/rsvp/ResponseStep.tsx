@@ -43,7 +43,7 @@ export default function ResponseStep({
         <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-neutral-600">
           {household.invitation_type === "day"
             ? "We’re delighted to invite you to join us for the full celebration, beginning at St Andrew’s Church from 12:00pm."
-            : "We’re delighted to invite you to join our evening celebration at Longridge House from 7:00pm."}
+            : "We’re delighted to invite you to our evening celebration at Longridge House from 7:00pm. If you’d also like to join us earlier, you’re very welcome at the ceremony at St Andrew’s Church at 12:30pm, with arrival from 12:00pm."}
         </p>
       </div>
 

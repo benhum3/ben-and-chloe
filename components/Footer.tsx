@@ -94,7 +94,21 @@ export default function Footer() {
             href="#home"
             className="mt-10 inline-flex items-center gap-3 border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.28em] text-neutral-300 transition-colors duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
           >
-            Back to the top <span aria-hidden="true">↑</span>
+            Back to the top
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 12 12"
+              fill="none"
+              className="h-3 w-3 shrink-0"
+            >
+              <path
+                d="M6 10.25v-7M3.5 5.25 6 2.75l2.5 2.5"
+                stroke="currentColor"
+                strokeWidth="1.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </a>
 
           <div className="mt-14 w-full border-t border-white/10 pt-8">

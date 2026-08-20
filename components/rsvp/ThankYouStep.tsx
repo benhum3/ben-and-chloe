@@ -48,11 +48,22 @@ export default function ThankYouStep({
             We look forward to seeing you
           </p>
 
-          <p className="mt-3 font-serif text-2xl leading-8">
-            {invitationType === "day"
-              ? "St Andrew’s Church · From 12:00pm"
-              : "Longridge House · From 7:00pm"}
-          </p>
+          {invitationType === "day" ? (
+            <p className="mt-3 font-serif text-2xl leading-8">
+              St Andrew’s Church · From 12:00pm
+            </p>
+          ) : (
+            <div className="mt-4 space-y-3">
+              <p className="font-serif text-2xl leading-8">
+                Longridge House · From 7:00pm
+              </p>
+              <p className="text-sm leading-7 text-neutral-600">
+                If you’d like to join us earlier, you’re also very welcome at
+                the ceremony at St Andrew’s Church at 12:30pm, with arrival from
+                12:00pm.
+              </p>
+            </div>
+          )}
 
           <p className="mt-2 text-sm text-neutral-500">
             Saturday, 19 December 2026

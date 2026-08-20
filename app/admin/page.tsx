@@ -14,6 +14,8 @@ import Monogram from "@/components/Monogram";
 type GuestStatus = "all" | "attending" | "declined" | "pending";
 type InvitationType = "day" | "evening";
 type InvitationFilter = "all" | InvitationType;
+type GuestSort = "guest-asc" | "household-asc";
+type EditableAttendance = "attending" | "declined" | "pending";
 
 type DashboardGuest = {
   id: string;
@@ -117,6 +119,14 @@ export default function AdminPage() {
     useState<GuestStatus>("all");
   const [invitationFilter, setInvitationFilter] =
     useState<InvitationFilter>("all");
+  const [guestSort, setGuestSort] = useState<GuestSort>("guest-asc");
+  const [editingGuestId, setEditingGuestId] = useState("");
+  const [editAttendance, setEditAttendance] =
+    useState<EditableAttendance>("pending");
+  const [editDietaryRequirements, setEditDietaryRequirements] = useState("");
+  const [responseSaving, setResponseSaving] = useState(false);
+  const [responseMessage, setResponseMessage] = useState("");
+  const [responseError, setResponseError] = useState("");
 
   const loadDashboard = useCallback(async (showLoading = true) => {
       if (showLoading) setLoading(true);
@@ -201,31 +211,120 @@ export default function AdminPage() {
 
     const normalisedSearch = searchTerm.trim().toLowerCase();
 
-    return dashboardData.guests.filter((guest) => {
-      const matchesSearch =
-        normalisedSearch.length === 0 ||
-        guest.fullName.toLowerCase().includes(normalisedSearch) ||
-        guest.householdName.toLowerCase().includes(normalisedSearch) ||
-        guest.dietaryRequirements
-          ?.toLowerCase()
-          .includes(normalisedSearch);
+    return dashboardData.guests
+      .filter((guest) => {
+        const matchesSearch =
+          normalisedSearch.length === 0 ||
+          guest.fullName.toLowerCase().includes(normalisedSearch) ||
+          guest.householdName.toLowerCase().includes(normalisedSearch) ||
+          guest.dietaryRequirements
+            ?.toLowerCase()
+            .includes(normalisedSearch);
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        (statusFilter === "attending" &&
-          guest.attending === true) ||
-        (statusFilter === "declined" &&
-          guest.attending === false) ||
-        (statusFilter === "pending" &&
-          guest.attending === null);
+        const matchesStatus =
+          statusFilter === "all" ||
+          (statusFilter === "attending" &&
+            guest.attending === true) ||
+          (statusFilter === "declined" &&
+            guest.attending === false) ||
+          (statusFilter === "pending" &&
+            guest.attending === null);
 
-      const matchesInvitation =
-        invitationFilter === "all" ||
-        guest.invitationType === invitationFilter;
+        const matchesInvitation =
+          invitationFilter === "all" ||
+          guest.invitationType === invitationFilter;
 
-      return matchesSearch && matchesStatus && matchesInvitation;
-    });
-  }, [dashboardData, invitationFilter, searchTerm, statusFilter]);
+        return matchesSearch && matchesStatus && matchesInvitation;
+      })
+      .sort((left, right) => {
+        const primaryComparison =
+          guestSort === "household-asc"
+            ? left.householdName.localeCompare(right.householdName)
+            : left.fullName.localeCompare(right.fullName);
+
+        if (primaryComparison !== 0) return primaryComparison;
+
+        return guestSort === "household-asc"
+          ? left.fullName.localeCompare(right.fullName)
+          : left.householdName.localeCompare(right.householdName);
+      });
+  }, [dashboardData, guestSort, invitationFilter, searchTerm, statusFilter]);
+
+  const editingGuest = useMemo(
+    () =>
+      dashboardData?.guests.find((guest) => guest.id === editingGuestId) ??
+      null,
+    [dashboardData, editingGuestId],
+  );
+
+  function startEditingResponse(guest: DashboardGuest) {
+    setEditingGuestId(guest.id);
+    setEditAttendance(
+      guest.attending === true
+        ? "attending"
+        : guest.attending === false
+          ? "declined"
+          : "pending",
+    );
+    setEditDietaryRequirements(guest.dietaryRequirements ?? "");
+    setResponseError("");
+    setResponseMessage("");
+  }
+
+  function cancelEditingResponse() {
+    setEditingGuestId("");
+    setResponseError("");
+  }
+
+  async function saveResponse(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingGuest) return;
+
+    setResponseSaving(true);
+    setResponseError("");
+    setResponseMessage("");
+
+    try {
+      const attending =
+        editAttendance === "pending"
+          ? null
+          : editAttendance === "attending";
+      const response = await fetch("/api/admin/responses", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guestId: editingGuest.id,
+          attending,
+          dietaryRequirements:
+            attending === true ? editDietaryRequirements : "",
+        }),
+      });
+      const data = (await response.json()) as { error?: string };
+
+      if (response.status === 401) {
+        setUnlocked(false);
+        setDashboardData(null);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Unable to update the response.");
+      }
+
+      const guestName = editingGuest.fullName;
+      setEditingGuestId("");
+      setResponseMessage(`${guestName}’s response was updated.`);
+      await loadDashboard(false);
+    } catch (saveError) {
+      setResponseError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Unable to update the response.",
+      );
+    } finally {
+      setResponseSaving(false);
+    }
+  }
 
   const managedHouseholds = useMemo<ManagedHousehold[]>(() => {
     if (!dashboardData) return [];
@@ -674,7 +773,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 py-6 md:grid-cols-[1fr_auto_auto]">
+              <div className="grid gap-4 py-6 md:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto]">
                 <input
                   aria-label="Search guests"
                   type="search"
@@ -683,7 +782,7 @@ export default function AdminPage() {
                     setSearchTerm(event.target.value)
                   }
                   placeholder="Search guest, household or dietary requirement"
-                  className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
+                  className="w-full border border-[#e6e2da] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641] md:col-span-2 xl:col-span-1"
                 />
 
                 <select
@@ -714,10 +813,123 @@ export default function AdminPage() {
                   <option value="day">Day guests</option>
                   <option value="evening">Evening guests</option>
                 </select>
+
+                <select
+                  aria-label="Sort guests alphabetically"
+                  value={guestSort}
+                  onChange={(event) =>
+                    setGuestSort(event.target.value as GuestSort)
+                  }
+                  className="border border-[#e6e2da] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
+                >
+                  <option value="guest-asc">Individual A–Z</option>
+                  <option value="household-asc">Household A–Z</option>
+                </select>
               </div>
 
+              {(responseError || responseMessage) && !editingGuest && (
+                <div
+                  role={responseError ? "alert" : "status"}
+                  className={`mb-6 border px-5 py-4 text-sm ${
+                    responseError
+                      ? "border-red-200 text-red-700"
+                      : "border-green-700/20 text-green-800"
+                  }`}
+                >
+                  {responseError || responseMessage}
+                </div>
+              )}
+
+              {editingGuest && (
+                <form
+                  onSubmit={saveResponse}
+                  className="mb-6 border border-[#d2a641]/50 bg-[#d2a641]/5 p-5 sm:p-7"
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-[var(--gold-text)]">
+                        Edit response
+                      </p>
+                      <h3 className="mt-2 font-serif text-2xl">
+                        {editingGuest.fullName}
+                      </h3>
+                      <p className="mt-1 text-sm text-neutral-500">
+                        {editingGuest.householdName}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={cancelEditingResponse}
+                      disabled={responseSaving}
+                      className="self-start text-[9px] uppercase tracking-[0.22em] text-neutral-500 transition hover:text-[#181818] disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  <div className="mt-6 grid gap-4 lg:grid-cols-[0.55fr_1.45fr]">
+                    <label className="block">
+                      <span className="mb-2 block text-[10px] uppercase tracking-[0.22em] text-neutral-500">
+                        RSVP status
+                      </span>
+                      <select
+                        value={editAttendance}
+                        onChange={(event) =>
+                          setEditAttendance(
+                            event.target.value as EditableAttendance,
+                          )
+                        }
+                        disabled={responseSaving}
+                        className="w-full border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641] disabled:opacity-50"
+                      >
+                        <option value="attending">Attending</option>
+                        <option value="declined">Declined</option>
+                        <option value="pending">Pending</option>
+                      </select>
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-2 block text-[10px] uppercase tracking-[0.22em] text-neutral-500">
+                        Dietary requirements
+                      </span>
+                      <textarea
+                        value={editDietaryRequirements}
+                        onChange={(event) =>
+                          setEditDietaryRequirements(event.target.value)
+                        }
+                        disabled={
+                          responseSaving || editAttendance !== "attending"
+                        }
+                        maxLength={500}
+                        rows={3}
+                        placeholder={
+                          editAttendance === "attending"
+                            ? "None provided"
+                            : "Only available for attending guests"
+                        }
+                        className="w-full resize-y border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm leading-6 outline-none transition focus:border-[#d2a641] disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                    </label>
+                  </div>
+
+                  {responseError && (
+                    <p role="alert" className="mt-4 text-sm text-red-700">
+                      {responseError}
+                    </p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={responseSaving}
+                    className="mt-5 rounded-full border border-[#d2a641] bg-[#d2a641] px-7 py-3 text-[10px] uppercase tracking-[0.24em] text-[#181818] transition hover:bg-transparent hover:text-[var(--gold-text)] disabled:opacity-50"
+                  >
+                    {responseSaving ? "Saving..." : "Save response"}
+                  </button>
+                </form>
+              )}
+
               <div className="hidden overflow-x-auto border-y border-[#e6e2da] md:block">
-                <table className="w-full min-w-[850px] text-left">
+                <table className="w-full min-w-[960px] text-left">
                   <thead>
                     <tr className="border-b border-[#e6e2da] text-[10px] uppercase tracking-[0.25em] text-neutral-500">
                       <th className="px-4 py-5 font-normal">
@@ -734,6 +946,9 @@ export default function AdminPage() {
                       </th>
                       <th className="px-4 py-5 font-normal">
                         Dietary requirements
+                      </th>
+                      <th className="px-4 py-5 text-right font-normal">
+                        Edit
                       </th>
                     </tr>
                   </thead>
@@ -762,6 +977,17 @@ export default function AdminPage() {
                         <td className="px-4 py-5 text-sm text-neutral-600">
                           {guest.dietaryRequirements?.trim() ||
                             "None provided"}
+                        </td>
+
+                        <td className="px-4 py-5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => startEditingResponse(guest)}
+                            aria-label={`Edit ${guest.fullName}’s response`}
+                            className="border-b border-[#d2a641] pb-1 text-[9px] uppercase tracking-[0.2em] text-[var(--gold-text)] transition hover:text-[#181818]"
+                          >
+                            Edit
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -796,6 +1022,14 @@ export default function AdminPage() {
                       {guest.dietaryRequirements?.trim() ||
                         "None provided"}
                     </p>
+
+                    <button
+                      type="button"
+                      onClick={() => startEditingResponse(guest)}
+                      className="mt-5 border-b border-[#d2a641] pb-1 text-[9px] uppercase tracking-[0.2em] text-[var(--gold-text)]"
+                    >
+                      Edit response
+                    </button>
                   </article>
                 ))}
               </div>
