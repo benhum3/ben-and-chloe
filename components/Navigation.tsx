@@ -160,6 +160,7 @@ export default function Navigation() {
   ];
   const photosArePrimary =
     primaryAction === "photos" || primaryAction === "photos-after";
+  const monogramReveal = photosArePrimary ? 1 : navReveal;
   const navigationLinks = primaryAction === "photos-after"
     ? []
     : primaryAction === "photos"
@@ -204,13 +205,13 @@ export default function Navigation() {
               <a
                 href="#home"
                 aria-label="Benjamin and Chloe — back to the top"
-                aria-hidden={navReveal <= 0.8}
-                tabIndex={navReveal > 0.8 ? 0 : -1}
+                aria-hidden={monogramReveal <= 0.8}
+                tabIndex={monogramReveal > 0.8 ? 0 : -1}
                 className="absolute inset-0 block origin-left transition-[opacity,transform,filter] duration-500 ease-out hover:brightness-90 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641]"
                 style={{
-                  opacity: navReveal,
-                  transform: `translate3d(0, ${(1 - navReveal) * -8}px, 0) scale(${0.92 + navReveal * 0.08})`,
-                  pointerEvents: navReveal > 0.8 ? "auto" : "none",
+                  opacity: monogramReveal,
+                  transform: `translate3d(0, ${(1 - monogramReveal) * -8}px, 0) scale(${0.92 + monogramReveal * 0.08})`,
+                  pointerEvents: monogramReveal > 0.8 ? "auto" : "none",
                 }}
               >
                 <Image
