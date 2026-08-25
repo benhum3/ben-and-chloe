@@ -16,6 +16,22 @@ type InvitationType = "day" | "evening";
 type InvitationFilter = "all" | InvitationType;
 type GuestSort = "guest-asc" | "household-asc";
 type EditableAttendance = "attending" | "declined" | "pending";
+type AdminSection =
+  | "overview"
+  | "planning"
+  | "tables"
+  | "photos"
+  | "guests"
+  | "guest-notes";
+
+const dashboardSections: Array<{ value: AdminSection; label: string }> = [
+  { value: "overview", label: "Overview" },
+  { value: "planning", label: "Planning" },
+  { value: "tables", label: "Tables" },
+  { value: "photos", label: "Photos" },
+  { value: "guests", label: "Guests" },
+  { value: "guest-notes", label: "Notes & Songs" },
+];
 
 type DashboardGuest = {
   id: string;
@@ -114,6 +130,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [dashboardError, setDashboardError] = useState("");
 
+  const [activeSection, setActiveSection] =
+    useState<AdminSection>("overview");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] =
     useState<GuestStatus>("all");
@@ -135,6 +153,7 @@ export default function AdminPage() {
       try {
         const response = await fetch("/api/admin/dashboard", {
           cache: "no-store",
+          credentials: "same-origin",
         });
 
         const data = await response.json();
@@ -179,6 +198,7 @@ export default function AdminPage() {
     try {
       const response = await fetch("/api/admin/login", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
@@ -190,7 +210,10 @@ export default function AdminPage() {
       }
 
       setPassword("");
-      await loadDashboard();
+      // Start a fresh document request after the browser has accepted the
+      // session cookie. This avoids a same-tick dashboard request racing the
+      // cookie update in some browsers.
+      window.location.replace("/admin");
     } catch {
       setError("Unable to sign in. Please try again.");
     } finally {
@@ -199,7 +222,10 @@ export default function AdminPage() {
   }
 
   async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
+    await fetch("/api/admin/logout", {
+      method: "POST",
+      credentials: "same-origin",
+    });
     setUnlocked(false);
     setDashboardData(null);
   }
@@ -274,6 +300,22 @@ export default function AdminPage() {
   function cancelEditingResponse() {
     setEditingGuestId("");
     setResponseError("");
+  }
+
+  function showSection(section: AdminSection) {
+    setActiveSection(section);
+
+    window.requestAnimationFrame(() => {
+      document.getElementById("dashboard-workspace")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }
+
+  function focusInvitationGuests(filter: InvitationFilter) {
+    setInvitationFilter(filter);
+    showSection("guests");
   }
 
   async function saveResponse(event: React.FormEvent<HTMLFormElement>) {
@@ -578,6 +620,17 @@ export default function AdminPage() {
       (guest) =>
         guest.invitationType === "evening" && guest.attending === true,
     ).length ?? 0;
+  const invitationGuestCounts = {
+    all: dashboardData?.guests.length ?? 0,
+    day:
+      dashboardData?.guests.filter(
+        (guest) => guest.invitationType === "day",
+      ).length ?? 0,
+    evening:
+      dashboardData?.guests.filter(
+        (guest) => guest.invitationType === "evening",
+      ).length ?? 0,
+  };
 
   const statisticCards = [
     ["Guests Invited", stats?.totalGuests ?? "—"],
@@ -593,7 +646,7 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-[#f8f6f2] px-5 py-16 text-[#181818] md:px-8 md:py-24">
       <section className="mx-auto max-w-7xl">
-        <div className="mb-16 flex flex-col items-center text-center">
+        <div className="mb-10 flex flex-col items-center text-center md:mb-12">
           <Monogram />
 
           <p className="mb-6 text-xs uppercase tracking-[0.42em] text-neutral-500">
@@ -612,15 +665,24 @@ export default function AdminPage() {
 
         <nav
           aria-label="Dashboard sections"
-          className="sticky top-[calc(env(safe-area-inset-top)+0.75rem)] z-40 mx-auto mb-12 flex w-fit max-w-full flex-wrap justify-center gap-x-5 gap-y-2 rounded-full border border-[#ded9cf]/80 bg-[#f8f6f2]/90 px-5 py-3 text-[9px] uppercase tracking-[0.2em] text-neutral-500 shadow-[0_8px_30px_rgba(24,24,24,0.06)] backdrop-blur-md md:top-3 md:gap-x-7 md:px-7 md:text-[10px] md:tracking-[0.24em]"
+          className="sticky top-[calc(env(safe-area-inset-top)+0.75rem)] z-40 mx-auto mb-10 flex w-full max-w-3xl flex-nowrap items-center gap-5 overflow-x-auto rounded-full border border-[#ded9cf]/80 bg-[#f8f6f2]/90 px-5 py-3 text-[9px] uppercase tracking-[0.2em] text-neutral-500 shadow-[0_8px_30px_rgba(24,24,24,0.06)] backdrop-blur-md md:top-3 md:w-fit md:gap-7 md:px-7 md:text-[10px] md:tracking-[0.24em]"
         >
-          <a href="#overview" className="transition hover:text-[var(--gold-text)]">Overview</a>
-          <a href="#planning" className="transition hover:text-[var(--gold-text)]">Planning</a>
-          <a href="#tables" className="transition hover:text-[var(--gold-text)]">Tables</a>
-          <a href="#photos" className="transition hover:text-[var(--gold-text)]">Photos</a>
-          <a href="#guest-management" className="transition hover:text-[var(--gold-text)]">Add Guests</a>
-          <a href="#guests" className="transition hover:text-[var(--gold-text)]">Guests</a>
-          <button type="button" onClick={() => void handleLogout()} className="transition hover:text-[var(--gold-text)]">
+          {dashboardSections.map((section) => (
+            <button
+              key={section.value}
+              type="button"
+              aria-pressed={activeSection === section.value}
+              onClick={() => showSection(section.value)}
+              className={`shrink-0 border-b pb-1 transition ${
+                activeSection === section.value
+                  ? "border-[#d2a641] text-[#181818]"
+                  : "border-transparent hover:text-[var(--gold-text)]"
+              }`}
+            >
+              {section.label}
+            </button>
+          ))}
+          <button type="button" onClick={() => void handleLogout()} className="shrink-0 border-l border-[#ded9cf] pl-5 transition hover:text-[var(--gold-text)] md:pl-7">
             SIGN OUT
           </button>
         </nav>
@@ -640,8 +702,8 @@ export default function AdminPage() {
         )}
 
         {!loading && !dashboardError && dashboardData && (
-          <>
-            <div id="overview" className="grid scroll-mt-28 grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div id="dashboard-workspace" className="scroll-mt-28">
+            <div className={activeSection === "overview" ? "grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" : "hidden"}>
               {statisticCards.map(([label, value]) => (
                 <div
                   key={label}
@@ -656,7 +718,7 @@ export default function AdminPage() {
               ))}
             </div>
 
-            <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            <div className={activeSection === "overview" ? "mt-8 grid gap-4 lg:grid-cols-3" : "hidden"}>
               <article className="border border-[#ded9cf] p-7">
                 <div className="flex items-end justify-between gap-4">
                   <div>
@@ -686,15 +748,23 @@ export default function AdminPage() {
                 <p className="text-[10px] uppercase tracking-[0.25em] text-neutral-500">
                   Confirmed Attendance
                 </p>
-                <div className="mt-5 flex gap-8">
-                  <div>
+                <div className="mt-5 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => focusInvitationGuests("day")}
+                    className="min-w-0 flex-1 border border-transparent p-3 text-left transition hover:border-[#d2a641]/40 hover:bg-[#d2a641]/5"
+                  >
                     <p className="font-serif text-3xl">{dayGuestsAttending}</p>
                     <p className="mt-1 text-xs text-neutral-500">Day guests</p>
-                  </div>
-                  <div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => focusInvitationGuests("evening")}
+                    className="min-w-0 flex-1 border border-transparent p-3 text-left transition hover:border-[#d2a641]/40 hover:bg-[#d2a641]/5"
+                  >
                     <p className="font-serif text-3xl">{eveningGuestsAttending}</p>
                     <p className="mt-1 text-xs text-neutral-500">Evening guests</p>
-                  </div>
+                  </button>
                 </div>
               </article>
 
@@ -712,26 +782,25 @@ export default function AdminPage() {
               </article>
             </div>
 
-            <div className="mt-20">
+            <div className={activeSection === "planning" ? "pt-4" : "hidden"}>
               <PlanningTasks />
             </div>
 
-            <div className="mt-20">
+            <div className={activeSection === "tables" ? "pt-4" : "hidden"}>
               <SeatingPlanner guests={dashboardData.guests} />
             </div>
 
-            <div className="mt-20">
+            <div className={activeSection === "photos" ? "pt-4" : "hidden"}>
               <PhotoManagement />
             </div>
 
-            <div className="mt-20">
+            <div className={activeSection === "guests" ? "space-y-16 pt-4" : "hidden"}>
               <GuestManagement
                 households={managedHouseholds}
                 onChanged={() => loadDashboard(false)}
               />
-            </div>
 
-            <div id="guests" className="mt-20 scroll-mt-28">
+            <div id="guests" className="scroll-mt-28">
               <div className="flex flex-col gap-6 border-b border-[#e6e2da] pb-8 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
@@ -773,7 +842,46 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 py-6 md:grid-cols-2 xl:grid-cols-[1fr_auto_auto_auto]">
+              <div className="border-b border-[#e6e2da] py-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+                      Focus guest list
+                    </p>
+                    <p className="mt-1 text-sm text-neutral-600">
+                      Switch between day and evening invitations.
+                    </p>
+                  </div>
+
+                  <div
+                    role="group"
+                    aria-label="Focus guest list by invitation type"
+                    className="grid grid-cols-3 rounded-full border border-[#ded9cf] bg-white/30 p-1"
+                  >
+                    {([
+                      ["all", "All", invitationGuestCounts.all],
+                      ["day", "Day", invitationGuestCounts.day],
+                      ["evening", "Evening", invitationGuestCounts.evening],
+                    ] as const).map(([value, label, count]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        aria-pressed={invitationFilter === value}
+                        onClick={() => setInvitationFilter(value)}
+                        className={`rounded-full px-4 py-3 text-[9px] uppercase tracking-[0.18em] transition sm:px-5 ${
+                          invitationFilter === value
+                            ? "bg-[#d2a641] text-[#181818] shadow-sm"
+                            : "text-neutral-500 hover:text-[#181818]"
+                        }`}
+                      >
+                        {label} <span className="ml-1 opacity-70">{count}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 py-6 md:grid-cols-2 xl:grid-cols-[1fr_auto_auto]">
                 <input
                   aria-label="Search guests"
                   type="search"
@@ -797,21 +905,6 @@ export default function AdminPage() {
                   <option value="attending">Attending</option>
                   <option value="declined">Declined</option>
                   <option value="pending">Pending</option>
-                </select>
-
-                <select
-                  aria-label="Filter guests by invitation type"
-                  value={invitationFilter}
-                  onChange={(event) =>
-                    setInvitationFilter(
-                      event.target.value as InvitationFilter,
-                    )
-                  }
-                  className="border border-[#e6e2da] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
-                >
-                  <option value="all">All invitations</option>
-                  <option value="day">Day guests</option>
-                  <option value="evening">Evening guests</option>
                 </select>
 
                 <select
@@ -928,10 +1021,16 @@ export default function AdminPage() {
                 </form>
               )}
 
-              <div className="hidden overflow-x-auto border-y border-[#e6e2da] md:block">
+              {filteredGuests.length > 8 && (
+                <p className="mb-3 text-[9px] uppercase tracking-[0.2em] text-neutral-400">
+                  Scroll within the list to see more guests
+                </p>
+              )}
+
+              <div className="hidden max-h-[68vh] overflow-auto overscroll-contain border-y border-[#e6e2da] md:block">
                 <table className="w-full min-w-[960px] text-left">
-                  <thead>
-                    <tr className="border-b border-[#e6e2da] text-[10px] uppercase tracking-[0.25em] text-neutral-500">
+                  <thead className="sticky top-0 z-10 bg-[#f8f6f2] shadow-[0_1px_0_#e6e2da]">
+                    <tr className="text-[10px] uppercase tracking-[0.25em] text-neutral-500">
                       <th className="px-4 py-5 font-normal">
                         Guest
                       </th>
@@ -995,7 +1094,7 @@ export default function AdminPage() {
                 </table>
               </div>
 
-              <div className="divide-y divide-[#e6e2da] border-y border-[#e6e2da] md:hidden">
+              <div className="max-h-[68vh] divide-y divide-[#e6e2da] overflow-y-auto overscroll-contain border-y border-[#e6e2da] pr-2 md:hidden">
                 {filteredGuests.map((guest) => (
                   <article key={guest.id} className="py-6">
                     <div className="flex items-start justify-between gap-4">
@@ -1042,8 +1141,25 @@ export default function AdminPage() {
                 </div>
               )}
             </div>
+            </div>
 
-            <div className="mt-20 grid gap-12 lg:grid-cols-2">
+            <div className={activeSection === "guest-notes" ? "pt-4" : "hidden"}>
+              <div className="mb-8 flex flex-col gap-4 border-b border-[#e6e2da] pb-7 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-text)]">
+                    From your guests
+                  </p>
+                  <h2 className="mt-3 font-serif text-4xl md:text-5xl">
+                    Notes & song suggestions
+                  </h2>
+                </div>
+                <p className="text-sm text-neutral-500">
+                  {dashboardData.messages.length} notes ·{" "}
+                  {dashboardData.songRequests.length} songs
+                </p>
+              </div>
+
+            <div className="grid gap-8 lg:grid-cols-2">
               <section>
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                   <div>
@@ -1066,7 +1182,7 @@ export default function AdminPage() {
                   </button>
                 </div>
 
-                <div className="mt-8 divide-y divide-[#e6e2da] border-y border-[#e6e2da]">
+                <div className="mt-6 max-h-[52vh] divide-y divide-[#e6e2da] overflow-y-auto overscroll-contain border-y border-[#e6e2da] pr-2">
                   {dashboardData.songRequests.length > 0 ? (
                     dashboardData.songRequests.map((request) => (
                       <article key={request.id} className="py-6">
@@ -1096,7 +1212,7 @@ export default function AdminPage() {
                   Notes from your guests
                 </h2>
 
-                <div className="mt-8 divide-y divide-[#e6e2da] border-y border-[#e6e2da]">
+                <div className="mt-6 max-h-[52vh] divide-y divide-[#e6e2da] overflow-y-auto overscroll-contain border-y border-[#e6e2da] pr-2">
                   {dashboardData.messages.length > 0 ? (
                     dashboardData.messages.map((message) => (
                       <article key={message.id} className="py-6">
@@ -1117,8 +1233,9 @@ export default function AdminPage() {
                 </div>
               </section>
             </div>
+            </div>
 
-            <div className="mt-20 border-t border-[#e6e2da] pt-10">
+            <div className={activeSection === "overview" ? "mt-16 border-t border-[#e6e2da] pt-10" : "hidden"}>
               <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.35em] text-neutral-500">
@@ -1197,7 +1314,7 @@ export default function AdminPage() {
                 Return Home
               </Link>
             </div>
-          </>
+          </div>
         )}
       </section>
     </main>
