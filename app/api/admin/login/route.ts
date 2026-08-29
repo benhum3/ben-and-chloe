@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { recordAppError } from "@/lib/error-monitoring";
 import {
   createAdminSession,
   verifyAdminPassword,
@@ -48,6 +49,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Admin login failed:", error);
+    await recordAppError({
+      source: "admin-login",
+      message: "Unexpected admin login failure",
+      statusCode: 500,
+    });
 
     return NextResponse.json(
       { error: "Unable to sign in." },

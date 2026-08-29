@@ -46,6 +46,11 @@ The launch-readiness migration:
 The wedding photos migration creates the public photo bucket and its private
 metadata table. Apply it before testing or deploying photo uploads.
 
+The error-monitoring migration creates a private, service-role-only event log.
+Apply it before deploying the monitoring release. The dashboard **Monitor** tab
+then reports RSVP, invitation lookup and unexpected server failures from the
+last 30 days. Monitoring intentionally excludes guest names and form contents.
+
 ## Release checklist
 
 Before pushing a release:

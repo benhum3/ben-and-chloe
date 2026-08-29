@@ -22,7 +22,8 @@ type AdminSection =
   | "tables"
   | "photos"
   | "guests"
-  | "guest-notes";
+  | "guest-notes"
+  | "monitor";
 
 const dashboardSections: Array<{ value: AdminSection; label: string }> = [
   { value: "overview", label: "Overview" },
@@ -31,6 +32,7 @@ const dashboardSections: Array<{ value: AdminSection; label: string }> = [
   { value: "photos", label: "Photos" },
   { value: "guests", label: "Guests" },
   { value: "guest-notes", label: "Notes & Songs" },
+  { value: "monitor", label: "Monitor" },
 ];
 
 type DashboardGuest = {
@@ -75,6 +77,20 @@ type DashboardData = {
     invitationName: string;
     message: string;
   }>;
+  monitor: {
+    available: boolean;
+    errorsLast24Hours: number;
+    trackedLast30Days: number;
+    recentEvents: Array<{
+      id: string;
+      source: string;
+      message: string;
+      severity: "warning" | "error" | "critical";
+      statusCode: number | null;
+      fingerprint: string;
+      createdAt: string;
+    }>;
+  };
   generatedAt: string;
 };
 
@@ -680,6 +696,12 @@ export default function AdminPage() {
               }`}
             >
               {section.label}
+              {section.value === "monitor" &&
+                Boolean(dashboardData?.monitor.errorsLast24Hours) && (
+                  <span className="ml-1 text-red-700">
+                    {dashboardData?.monitor.errorsLast24Hours}
+                  </span>
+                )}
             </button>
           ))}
           <button type="button" onClick={() => void handleLogout()} className="shrink-0 border-l border-[#ded9cf] pl-5 transition hover:text-[var(--gold-text)] md:pl-7">
@@ -792,6 +814,145 @@ export default function AdminPage() {
 
             <div className={activeSection === "photos" ? "pt-4" : "hidden"}>
               <PhotoManagement />
+            </div>
+
+            <div className={activeSection === "monitor" ? "pt-4" : "hidden"}>
+              <div className="flex flex-col gap-5 border-b border-[#e6e2da] pb-8 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.35em] text-[var(--gold-text)]">
+                    System Monitor
+                  </p>
+                  <h2 className="mt-3 font-serif text-4xl md:text-5xl">
+                    RSVP health
+                  </h2>
+                  <p className="mt-3 max-w-xl text-sm leading-7 text-neutral-600">
+                    Private, server-side monitoring without guest names or form
+                    responses.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void loadDashboard(false)}
+                  className="self-start border-b border-[#d2a641] pb-1 text-[9px] uppercase tracking-[0.22em] text-[var(--gold-text)] sm:self-auto"
+                >
+                  Refresh monitor
+                </button>
+              </div>
+
+              {!dashboardData.monitor.available ? (
+                <div className="mt-8 border border-[#d2a641]/40 bg-[#d2a641]/5 p-6">
+                  <p className="font-serif text-2xl">Monitoring setup pending</p>
+                  <p className="mt-2 text-sm leading-7 text-neutral-600">
+                    Apply the latest Supabase migration to begin recording
+                    application errors.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                    <article className="border border-[#ded9cf] p-6">
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-neutral-500">
+                        Current status
+                      </p>
+                      <p
+                        className={`mt-3 font-serif text-3xl ${
+                          dashboardData.monitor.errorsLast24Hours > 0
+                            ? "text-red-800"
+                            : "text-green-800"
+                        }`}
+                      >
+                        {dashboardData.monitor.errorsLast24Hours > 0
+                          ? "Attention"
+                          : "All clear"}
+                      </p>
+                    </article>
+
+                    <article className="border border-[#ded9cf] p-6">
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-neutral-500">
+                        Last 24 hours
+                      </p>
+                      <p className="mt-3 font-serif text-3xl">
+                        {dashboardData.monitor.errorsLast24Hours}
+                      </p>
+                      <p className="mt-1 text-sm text-neutral-500">
+                        recorded errors
+                      </p>
+                    </article>
+
+                    <article className="border border-[#ded9cf] p-6">
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-neutral-500">
+                        Last 30 days
+                      </p>
+                      <p className="mt-3 font-serif text-3xl">
+                        {dashboardData.monitor.trackedLast30Days}
+                      </p>
+                      <p className="mt-1 text-sm text-neutral-500">
+                        recorded errors
+                      </p>
+                    </article>
+                  </div>
+
+                  <div className="mt-10">
+                    <p className="text-xs uppercase tracking-[0.3em] text-neutral-500">
+                      Recent events
+                    </p>
+
+                    {dashboardData.monitor.recentEvents.length > 0 ? (
+                      <div className="mt-5 max-h-[58vh] divide-y divide-[#e6e2da] overflow-y-auto overscroll-contain border-y border-[#e6e2da] pr-2">
+                        {dashboardData.monitor.recentEvents.map((event) => (
+                          <article
+                            key={event.id}
+                            className="flex flex-col gap-3 py-5 sm:flex-row sm:items-start sm:justify-between"
+                          >
+                            <div>
+                              <div className="flex flex-wrap items-center gap-3">
+                                <span
+                                  className={`text-[9px] uppercase tracking-[0.2em] ${
+                                    event.severity === "critical"
+                                      ? "text-red-800"
+                                      : "text-amber-800"
+                                  }`}
+                                >
+                                  {event.severity}
+                                </span>
+                                <span className="text-[9px] uppercase tracking-[0.2em] text-neutral-400">
+                                  {event.source.replaceAll("-", " ")}
+                                </span>
+                                {event.statusCode && (
+                                  <span className="text-[9px] text-neutral-400">
+                                    HTTP {event.statusCode}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-2 text-sm leading-6 text-neutral-700">
+                                {event.message}
+                              </p>
+                            </div>
+                            <time
+                              dateTime={event.createdAt}
+                              className="shrink-0 text-xs text-neutral-500"
+                            >
+                              {new Intl.DateTimeFormat("en-GB", {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                              }).format(new Date(event.createdAt))}
+                            </time>
+                          </article>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="mt-5 border-y border-[#e6e2da] py-10">
+                        <p className="font-serif text-2xl text-green-800">
+                          No application errors recorded.
+                        </p>
+                        <p className="mt-2 text-sm text-neutral-500">
+                          RSVP lookup and submission failures will appear here.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             <div className={activeSection === "guests" ? "space-y-16 pt-4" : "hidden"}>

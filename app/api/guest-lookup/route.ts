@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { recordAppError } from "@/lib/error-monitoring";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { consumeRateLimit } from "@/lib/rate-limit";
 import { isRsvpClosed } from "@/lib/wedding-schedule";
@@ -71,6 +72,12 @@ export async function POST(request: Request) {
 
     if (householdResult.error) {
       console.error("Household lookup failed:", householdResult.error);
+      await recordAppError({
+        source: "guest-lookup",
+        message: "Household lookup query failed",
+        statusCode: 500,
+        metadata: { stage: "household", code: householdResult.error.code },
+      });
 
       return NextResponse.json(
         { error: "We could not check your invitation. Please try again." },
@@ -91,6 +98,12 @@ export async function POST(request: Request) {
 
       if (matchingGuestsError) {
         console.error("Guest name lookup failed:", matchingGuestsError);
+        await recordAppError({
+          source: "guest-lookup",
+          message: "Guest name lookup query failed",
+          statusCode: 500,
+          metadata: { stage: "guest", code: matchingGuestsError.code },
+        });
 
         return NextResponse.json(
           { error: "We could not check your invitation. Please try again." },
@@ -124,6 +137,15 @@ export async function POST(request: Request) {
             "Guest household lookup failed:",
             resolvedHouseholdResult.error,
           );
+          await recordAppError({
+            source: "guest-lookup",
+            message: "Resolved household lookup query failed",
+            statusCode: 500,
+            metadata: {
+              stage: "resolved-household",
+              code: resolvedHouseholdResult.error.code,
+            },
+          });
 
           return NextResponse.json(
             { error: "We could not load your invitation. Please try again." },
@@ -163,6 +185,12 @@ export async function POST(request: Request) {
 
     if (guestsError) {
       console.error("Guest lookup failed:", guestsError);
+      await recordAppError({
+        source: "guest-lookup",
+        message: "Household guest lookup query failed",
+        statusCode: 500,
+        metadata: { stage: "household-guests", code: guestsError.code },
+      });
 
       return NextResponse.json(
         { error: "We could not load your invitation. Please try again." },
@@ -176,6 +204,13 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Unexpected guest lookup error:", error);
+    await recordAppError({
+      source: "guest-lookup",
+      message: "Unexpected invitation lookup failure",
+      severity: "critical",
+      statusCode: 500,
+      metadata: { stage: "unexpected" },
+    });
 
     return NextResponse.json(
       { error: "We could not check your invitation. Please try again." },

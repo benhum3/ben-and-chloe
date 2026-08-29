@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { recordAppError } from "@/lib/error-monitoring";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,7 @@ export async function GET() {
     const [
       { data: households, error: householdsError },
       { data: guests, error: guestsError },
+      { data: errorEvents, error: errorEventsError },
     ] = await Promise.all([
       supabaseAdmin
         .from("households")
@@ -49,10 +51,28 @@ export async function GET() {
           `,
         )
         .order("full_name", { ascending: true }),
+
+      supabaseAdmin
+        .from("app_error_events")
+        .select(
+          "id, source, message, severity, status_code, fingerprint, created_at",
+        )
+        .gte(
+          "created_at",
+          new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        )
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
 
     if (householdsError) {
       console.error("Dashboard household query failed:", householdsError);
+      await recordAppError({
+        source: "admin-dashboard",
+        message: "Dashboard household query failed",
+        statusCode: 500,
+        metadata: { stage: "households", code: householdsError.code },
+      });
 
       return NextResponse.json(
         { error: "Unable to load household data." },
@@ -62,6 +82,12 @@ export async function GET() {
 
     if (guestsError) {
       console.error("Dashboard guest query failed:", guestsError);
+      await recordAppError({
+        source: "admin-dashboard",
+        message: "Dashboard guest query failed",
+        statusCode: 500,
+        metadata: { stage: "guests", code: guestsError.code },
+      });
 
       return NextResponse.json(
         { error: "Unable to load guest data." },
@@ -71,6 +97,15 @@ export async function GET() {
 
     const householdRows = households ?? [];
     const guestRows = guests ?? [];
+    const errorEventRows = errorEventsError ? [] : (errorEvents ?? []);
+    const last24Hours = Date.now() - 24 * 60 * 60 * 1000;
+
+    if (errorEventsError) {
+      console.warn(
+        "Dashboard error monitor query failed:",
+        errorEventsError.code,
+      );
+    }
 
     const householdMap = new Map(
       householdRows.map((household) => [household.id, household]),
@@ -173,10 +208,32 @@ export async function GET() {
       guests: guestsWithHouseholds,
       songRequests,
       messages,
+      monitor: {
+        available: !errorEventsError,
+        errorsLast24Hours: errorEventRows.filter(
+          (event) => new Date(event.created_at).getTime() >= last24Hours,
+        ).length,
+        trackedLast30Days: errorEventRows.length,
+        recentEvents: errorEventRows.map((event) => ({
+          id: event.id,
+          source: event.source,
+          message: event.message,
+          severity: event.severity,
+          statusCode: event.status_code,
+          fingerprint: event.fingerprint,
+          createdAt: event.created_at,
+        })),
+      },
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error("Unexpected dashboard error:", error);
+    await recordAppError({
+      source: "admin-dashboard",
+      message: "Unexpected dashboard failure",
+      severity: "critical",
+      statusCode: 500,
+    });
 
     return NextResponse.json(
       { error: "Unable to load the dashboard." },

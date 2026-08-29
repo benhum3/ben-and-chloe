@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { recordAppError } from "@/lib/error-monitoring";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { consumeRateLimit } from "@/lib/rate-limit";
 import { isRsvpClosed } from "@/lib/wedding-schedule";
@@ -111,6 +112,13 @@ export async function POST(request: Request) {
 
     if (submissionError) {
       console.error("Atomic RSVP submission failed:", submissionError);
+      await recordAppError({
+        source: "rsvp-submit",
+        message: "Atomic RSVP submission failed",
+        severity: "critical",
+        statusCode: 500,
+        metadata: { stage: "database", code: submissionError.code },
+      });
 
       return NextResponse.json(
         { error: "We could not save your RSVP. Please try again." },
@@ -123,6 +131,13 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("RSVP submission failed:", error);
+    await recordAppError({
+      source: "rsvp-submit",
+      message: "Unexpected RSVP submission failure",
+      severity: "critical",
+      statusCode: 500,
+      metadata: { stage: "unexpected" },
+    });
 
     return NextResponse.json(
       { error: "Something went wrong while submitting the RSVP." },
