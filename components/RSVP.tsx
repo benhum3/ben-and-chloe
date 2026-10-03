@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Container from "./Container";
+import { RSVP_DEADLINE } from "@/lib/wedding-schedule";
 
 export default function RSVP() {
   return (
@@ -42,7 +43,7 @@ export default function RSVP() {
             </p>
 
             <p className="mt-2 font-serif text-2xl text-[#181818]">
-              30 September 2026
+              {RSVP_DEADLINE}
             </p>
 
             <p className="mt-3 text-sm text-neutral-500">

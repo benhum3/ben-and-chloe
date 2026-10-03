@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Container from "./Container";
+import { RSVP_DEADLINE } from "@/lib/wedding-schedule";
 
 const questions = [
   {
@@ -31,8 +32,7 @@ const questions = [
   },
   {
     question: "When should I respond by?",
-    answer:
-      "Please submit your RSVP by 30 September 2026. You can return to the RSVP page later if you need to update your response.",
+    answer: `Please submit your RSVP by ${RSVP_DEADLINE}. You can return to the RSVP page later if you need to update your response.`,
   },
 ];
 
