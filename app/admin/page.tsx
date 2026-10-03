@@ -13,6 +13,7 @@ import Monogram from "@/components/Monogram";
 
 type GuestStatus = "all" | "attending" | "declined" | "pending";
 type InvitationType = "day" | "evening";
+type HouseholdInvitationType = InvitationType | "mixed";
 type InvitationFilter = "all" | InvitationType;
 type GuestSort = "guest-asc" | "household-asc";
 type EditableAttendance = "attending" | "declined" | "pending";
@@ -55,13 +56,14 @@ type DashboardData = {
     totalHouseholds: number;
     dayHouseholds: number;
     eveningHouseholds: number;
+    mixedHouseholds: number;
     householdsResponded: number;
     householdsPending: number;
   };
   latestResponses: Array<{
     id: string;
     invitationName: string;
-    invitationType: InvitationType;
+    invitationType: HouseholdInvitationType;
     submittedAt: string;
     attending: number;
     declined: number;
@@ -394,6 +396,7 @@ export default function AdminPage() {
       const managedGuest = {
         id: guest.id,
         fullName: guest.fullName,
+        invitationType: guest.invitationType,
         attending: guest.attending,
       };
 
@@ -403,7 +406,6 @@ export default function AdminPage() {
         grouped.set(guest.householdId, {
           id: guest.householdId,
           invitationName: guest.householdName,
-          invitationType: guest.invitationType,
           guests: [managedGuest],
         });
       }
@@ -537,7 +539,11 @@ export default function AdminPage() {
       ["Household", "Invitation type", "Guests"],
       Array.from(pendingHouseholds.values()).map((guests) => [
         guests[0]?.householdName ?? "",
-        guests[0]?.invitationType === "evening" ? "Evening" : "Day",
+        new Set(guests.map((guest) => guest.invitationType)).size > 1
+          ? "Day & Evening"
+          : guests[0]?.invitationType === "evening"
+            ? "Evening"
+            : "Day",
         guests.map((guest) => guest.fullName).join(", "),
       ]),
     );
@@ -655,6 +661,7 @@ export default function AdminPage() {
     ["Guests Pending", stats?.pending ?? "—"],
     ["Day Households", stats?.dayHouseholds ?? "—"],
     ["Evening Households", stats?.eveningHouseholds ?? "—"],
+    ["Mixed Households", stats?.mixedHouseholds ?? "—"],
     ["Households Replied", stats?.householdsResponded ?? "—"],
     ["Households Pending", stats?.householdsPending ?? "—"],
   ];
@@ -1510,10 +1517,17 @@ function StatusBadge({
   );
 }
 
-function InvitationTypeBadge({ type }: { type: InvitationType }) {
+function InvitationTypeBadge({ type }: { type: HouseholdInvitationType }) {
+  const label =
+    type === "day"
+      ? "Day Guest"
+      : type === "evening"
+        ? "Evening Guest"
+        : "Mixed Household";
+
   return (
     <span className="inline-flex whitespace-nowrap border border-[#d2a641]/35 bg-[#d2a641]/5 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[#8a681e]">
-      {type === "day" ? "Day Guest" : "Evening Guest"}
+      {label}
     </span>
   );
 }

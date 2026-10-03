@@ -45,6 +45,7 @@ export async function GET() {
             id,
             household_id,
             full_name,
+            invitation_type,
             attending,
             dietary_requirements,
             updated_at
@@ -110,6 +111,21 @@ export async function GET() {
     const householdMap = new Map(
       householdRows.map((household) => [household.id, household]),
     );
+    const invitationTypesByHousehold = new Map<string, Set<string>>();
+
+    guestRows.forEach((guest) => {
+      const invitationTypes =
+        invitationTypesByHousehold.get(guest.household_id) ?? new Set<string>();
+      invitationTypes.add(guest.invitation_type);
+      invitationTypesByHousehold.set(guest.household_id, invitationTypes);
+    });
+
+    function getHouseholdInvitationType(householdId: string) {
+      const invitationTypes = invitationTypesByHousehold.get(householdId);
+
+      if (invitationTypes && invitationTypes.size > 1) return "mixed";
+      return invitationTypes?.values().next().value ?? "day";
+    }
 
     const attending = guestRows.filter(
       (guest) => guest.attending === true,
@@ -138,7 +154,7 @@ export async function GET() {
         return {
           id: household.id,
           invitationName: household.invitation_name,
-          invitationType: household.invitation_type,
+          invitationType: getHouseholdInvitationType(household.id),
           submittedAt: household.submitted_at,
           attending: householdGuests.filter(
             (guest) => guest.attending === true,
@@ -157,7 +173,7 @@ export async function GET() {
         fullName: guest.full_name,
         householdId: guest.household_id,
         householdName: household?.invitation_name ?? "Unknown household",
-        invitationType: household?.invitation_type ?? "day",
+        invitationType: guest.invitation_type,
         attending: guest.attending,
         dietaryRequirements: guest.dietary_requirements,
         submittedAt: household?.submitted_at ?? null,
@@ -195,10 +211,15 @@ export async function GET() {
         pending,
         totalHouseholds: householdRows.length,
         dayHouseholds: householdRows.filter(
-          (household) => household.invitation_type === "day",
+          (household) => getHouseholdInvitationType(household.id) === "day",
         ).length,
         eveningHouseholds: householdRows.filter(
-          (household) => household.invitation_type === "evening",
+          (household) =>
+            getHouseholdInvitationType(household.id) === "evening",
+        ).length,
+        mixedHouseholds: householdRows.filter(
+          (household) =>
+            getHouseholdInvitationType(household.id) === "mixed",
         ).length,
         householdsResponded,
         householdsPending:

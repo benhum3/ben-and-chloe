@@ -5,6 +5,7 @@ export type Guest = {
   id: string;
   household_id: string;
   full_name: string;
+  invitation_type: InvitationType;
   attending: boolean | null;
   dietary_requirements: string | null;
   created_at?: string;
@@ -28,6 +29,7 @@ export type LookupResponse = {
 export type GuestAnswer = {
   id: string;
   fullName: string;
+  invitationType: InvitationType;
   attending: boolean | null;
   dietaryRequirements: string;
 };

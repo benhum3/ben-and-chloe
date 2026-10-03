@@ -99,6 +99,7 @@ export default function RSVPPage() {
         lookupData.guests.map((guest) => ({
           id: guest.id,
           fullName: guest.full_name,
+          invitationType: guest.invitation_type,
           attending: guest.attending,
           dietaryRequirements: guest.dietary_requirements ?? "",
         })),
@@ -366,7 +367,7 @@ export default function RSVPPage() {
           <ThankYouStep
             nobodyAttending={nobodyAttending}
             wasUpdate={wasUpdate}
-            invitationType={household?.invitation_type ?? "day"}
+            attendingGuests={attendingGuests}
           />
           )}
         </div>

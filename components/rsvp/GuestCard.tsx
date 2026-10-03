@@ -11,7 +11,12 @@ export default function GuestCard({
 }: GuestCardProps) {
   return (
     <div className="border border-[#ded9cf] bg-white/15 px-5 py-6 transition-colors duration-300 hover:border-[#c9b58f]">
-      <p className="font-serif text-2xl">{guest.fullName}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="font-serif text-2xl">{guest.fullName}</p>
+        <span className="border border-[#d2a641]/35 bg-[#d2a641]/5 px-3 py-1.5 text-[9px] uppercase tracking-[0.2em] text-[var(--gold-text)]">
+          {guest.invitationType === "day" ? "Day Guest" : "Evening Guest"}
+        </span>
+      </div>
 
       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button

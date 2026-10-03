@@ -242,24 +242,15 @@ export async function PATCH(request: Request) {
 
     const { data: guest, error: guestError } = await supabaseAdmin
       .from("guests")
-      .select("id, household_id, attending")
+      .select("id, invitation_type, attending")
       .eq("id", guestId)
       .single();
 
-    if (guestError || guest.attending !== true) {
-      return NextResponse.json(
-        { error: "Only confirmed day guests can be assigned." },
-        { status: 400 },
-      );
-    }
-
-    const { data: household, error: householdError } = await supabaseAdmin
-      .from("households")
-      .select("invitation_type")
-      .eq("id", guest.household_id)
-      .single();
-
-    if (householdError || household.invitation_type !== "day") {
+    if (
+      guestError ||
+      guest.attending !== true ||
+      guest.invitation_type !== "day"
+    ) {
       return NextResponse.json(
         { error: "Only confirmed day guests can be assigned." },
         { status: 400 },
@@ -344,7 +335,7 @@ export async function PUT(request: Request) {
     const [guestsResult, tablesResult] = await Promise.all([
       supabaseAdmin
         .from("guests")
-        .select("id, household_id, attending")
+        .select("id, invitation_type, attending")
         .in("id", guestIds),
       supabaseAdmin
         .from("seating_tables")
@@ -368,7 +359,10 @@ export async function PUT(request: Request) {
     if (
       guestRows.length !== guestIds.length ||
       (tablesResult.data ?? []).length !== tableIds.length ||
-      guestRows.some((guest) => guest.attending !== true)
+      guestRows.some(
+        (guest) =>
+          guest.attending !== true || guest.invitation_type !== "day",
+      )
     ) {
       return NextResponse.json(
         { error: "The plan contains an ineligible guest or table." },
@@ -376,36 +370,6 @@ export async function PUT(request: Request) {
       );
     }
 
-    const householdIds = Array.from(
-      new Set(guestRows.map((guest) => guest.household_id)),
-    );
-    const { data: households, error: householdsError } = await supabaseAdmin
-      .from("households")
-      .select("id, invitation_type")
-      .in("id", householdIds);
-
-    if (householdsError) {
-      console.error(
-        "Suggested seating household validation failed:",
-        householdsError,
-      );
-      return NextResponse.json(
-        { error: "Unable to validate the suggested plan." },
-        { status: 500 },
-      );
-    }
-
-    if (
-      (households ?? []).length !== householdIds.length ||
-      (households ?? []).some(
-        (household) => household.invitation_type !== "day",
-      )
-    ) {
-      return NextResponse.json(
-        { error: "Only confirmed day guests can be included." },
-        { status: 400 },
-      );
-    }
   }
 
   const { data: currentAssignments, error: currentError } = await supabaseAdmin

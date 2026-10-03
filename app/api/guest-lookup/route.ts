@@ -174,6 +174,7 @@ export async function POST(request: Request) {
           id,
           household_id,
           full_name,
+          invitation_type,
           attending,
           dietary_requirements,
           created_at,

@@ -32,6 +32,10 @@ export default function DetailsStep({
   onBack,
 }: DetailsStepProps) {
   const isUpdate = Boolean(household.submitted_at);
+  const attendingInvitationTypes = new Set(
+    attendingGuests.map((guest) => guest.invitationType),
+  );
+  const attendingInvitationType = attendingGuests[0]?.invitationType;
 
   return (
     <>
@@ -42,7 +46,9 @@ export default function DetailsStep({
       <h1 className="font-serif text-5xl leading-none md:text-7xl">
         {nobodyAttending
           ? "Before You Go"
-          : household.invitation_type === "day"
+          : attendingInvitationTypes.size > 1
+            ? "Before The Celebration"
+            : attendingInvitationType === "day"
             ? "Before The Day"
             : "Before The Evening"}
       </h1>

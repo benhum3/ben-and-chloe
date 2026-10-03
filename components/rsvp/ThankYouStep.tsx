@@ -1,14 +1,29 @@
+import type { GuestAnswer, InvitationType } from "@/types/rsvp";
+
 type ThankYouStepProps = {
   nobodyAttending: boolean;
   wasUpdate: boolean;
-  invitationType: "day" | "evening";
+  attendingGuests: GuestAnswer[];
 };
 
 export default function ThankYouStep({
   nobodyAttending,
   wasUpdate,
-  invitationType,
+  attendingGuests,
 }: ThankYouStepProps) {
+  const guestsByInvitationType = attendingGuests.reduce<
+    Record<InvitationType, GuestAnswer[]>
+  >(
+    (groups, guest) => {
+      groups[guest.invitationType].push(guest);
+      return groups;
+    },
+    { day: [], evening: [] },
+  );
+  const attendingInvitationTypes = (
+    ["day", "evening"] as InvitationType[]
+  ).filter((type) => guestsByInvitationType[type].length > 0);
+  const isMixedHousehold = attendingInvitationTypes.length > 1;
   let message: string;
 
   if (wasUpdate) {
@@ -48,7 +63,18 @@ export default function ThankYouStep({
             We look forward to seeing you
           </p>
 
-          {invitationType === "day" ? (
+          {isMixedHousehold ? (
+            <div className="mt-5 space-y-6 text-left">
+              <InvitationSummary
+                invitationType="day"
+                guests={guestsByInvitationType.day}
+              />
+              <InvitationSummary
+                invitationType="evening"
+                guests={guestsByInvitationType.evening}
+              />
+            </div>
+          ) : attendingInvitationTypes[0] === "day" ? (
             <p className="mt-3 font-serif text-2xl leading-8">
               St Andrew’s Church · From 12:00pm
             </p>
@@ -69,12 +95,14 @@ export default function ThankYouStep({
             Saturday, 19 December 2026
           </p>
 
-          <a
-            href={`/api/calendar?type=${invitationType}`}
-            className="mt-5 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.24em] text-[var(--gold-text)] transition hover:text-[#181818]"
-          >
-            Add {invitationType} invitation to calendar
-          </a>
+          {!isMixedHousehold && (
+            <a
+              href={`/api/calendar?type=${attendingInvitationTypes[0]}`}
+              className="mt-5 inline-flex border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.24em] text-[var(--gold-text)] transition hover:text-[#181818]"
+            >
+              Add {attendingInvitationTypes[0]} invitation to calendar
+            </a>
+          )}
         </div>
       )}
 
@@ -82,5 +110,35 @@ export default function ThankYouStep({
         Benjamin &amp; Chloe
       </p>
     </>
+  );
+}
+
+function InvitationSummary({
+  invitationType,
+  guests,
+}: {
+  invitationType: InvitationType;
+  guests: GuestAnswer[];
+}) {
+  return (
+    <div className="border-l border-[#d2a641] pl-5">
+      <p className="text-[9px] uppercase tracking-[0.24em] text-[var(--gold-text)]">
+        {invitationType === "day" ? "Day Invitation" : "Evening Invitation"}
+      </p>
+      <p className="mt-2 text-sm text-neutral-600">
+        {guests.map((guest) => guest.fullName).join(" & ")}
+      </p>
+      <p className="mt-2 font-serif text-xl leading-7">
+        {invitationType === "day"
+          ? "St Andrew’s Church · From 12:00pm"
+          : "Longridge House · From 7:00pm"}
+      </p>
+      <a
+        href={`/api/calendar?type=${invitationType}`}
+        className="mt-3 inline-flex border-b border-[#d2a641] pb-1 text-[9px] uppercase tracking-[0.2em] text-[var(--gold-text)] transition hover:text-[#181818]"
+      >
+        Add to calendar
+      </a>
+    </div>
   );
 }

@@ -5,19 +5,29 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 
 type InvitationType = "day" | "evening";
 
+type ImportGuest = {
+  fullName: string;
+  invitationType: InvitationType;
+};
+
 type ImportHousehold = {
   invitationName: string;
   invitationType: InvitationType;
-  guests: string[];
+  guests: ImportGuest[];
 };
 
 type UpdateGuest = {
   id?: string;
   fullName: string;
+  invitationType: InvitationType;
 };
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isInvitationType(value: unknown): value is InvitationType {
+  return value === "day" || value === "evening";
+}
 
 async function requireAdmin() {
   if (!(await isAdminAuthenticated())) {
@@ -45,13 +55,21 @@ function normaliseHouseholds(value: unknown): ImportHousehold[] | null {
       typeof record.invitationName === "string"
         ? record.invitationName.trim()
         : "";
-    const invitationType = record.invitationType;
     const guests = Array.isArray(record.guests)
       ? record.guests
-          .filter((guest): guest is string => typeof guest === "string")
-          .map((guest) => guest.trim())
-          .filter(Boolean)
+          .filter(
+            (guest): guest is Record<string, unknown> =>
+              Boolean(guest && typeof guest === "object"),
+          )
+          .map((guest) => ({
+            fullName:
+              typeof guest.fullName === "string"
+                ? guest.fullName.trim()
+                : "",
+            invitationType: guest.invitationType,
+          }))
       : [];
+    const invitationType = guests[0]?.invitationType;
 
     if (
       !invitationName ||
@@ -59,12 +77,25 @@ function normaliseHouseholds(value: unknown): ImportHousehold[] | null {
       (invitationType !== "day" && invitationType !== "evening") ||
       guests.length === 0 ||
       guests.length > 20 ||
-      guests.some((guest) => guest.length > 160)
+      guests.some(
+        (guest) =>
+          !guest.fullName ||
+          guest.fullName.length > 160 ||
+          (guest.invitationType !== "day" &&
+            guest.invitationType !== "evening"),
+      )
     ) {
       return null;
     }
 
-    households.push({ invitationName, invitationType, guests });
+    households.push({
+      invitationName,
+      invitationType,
+      guests: guests.map((guest) => ({
+        fullName: guest.fullName,
+        invitationType: guest.invitationType as InvitationType,
+      })),
+    });
   }
 
   const names = households.map((household) =>
@@ -117,7 +148,6 @@ export async function PATCH(request: Request) {
   const body = (await request.json()) as {
     id?: unknown;
     invitationName?: unknown;
-    invitationType?: unknown;
     guests?: unknown;
   };
 
@@ -126,21 +156,25 @@ export async function PATCH(request: Request) {
     typeof body.invitationName === "string"
       ? body.invitationName.trim()
       : "";
-  const invitationType = body.invitationType;
   const guests = Array.isArray(body.guests)
     ? body.guests
-        .filter(
-          (guest): guest is UpdateGuest =>
-            Boolean(
-              guest &&
-                typeof guest === "object" &&
-                "fullName" in guest &&
-                typeof guest.fullName === "string",
-            ),
-        )
+        .filter((guest): guest is UpdateGuest => {
+          if (
+            !guest ||
+            typeof guest !== "object" ||
+            !("fullName" in guest) ||
+            typeof guest.fullName !== "string" ||
+            !("invitationType" in guest)
+          ) {
+            return false;
+          }
+
+          return isInvitationType(guest.invitationType);
+        })
         .map((guest) => ({
           id: typeof guest.id === "string" ? guest.id : undefined,
           fullName: guest.fullName.trim(),
+          invitationType: guest.invitationType,
         }))
     : [];
 
@@ -149,14 +183,15 @@ export async function PATCH(request: Request) {
     !UUID_PATTERN.test(id) ||
     !invitationName ||
     invitationName.length > 160 ||
-    (invitationType !== "day" && invitationType !== "evening") ||
     guests.length === 0 ||
     guests.length > 20 ||
     guests.some(
       (guest) =>
         !guest.fullName ||
         guest.fullName.length > 160 ||
-        Boolean(guest.id && !UUID_PATTERN.test(guest.id)),
+        Boolean(guest.id && !UUID_PATTERN.test(guest.id)) ||
+        (guest.invitationType !== "day" &&
+          guest.invitationType !== "evening"),
     )
   ) {
     return NextResponse.json(
@@ -166,7 +201,7 @@ export async function PATCH(request: Request) {
   }
 
   const { error } = await supabaseAdmin.rpc("admin_update_household", {
-    payload: { id, invitationName, invitationType, guests },
+    payload: { id, invitationName, guests },
   });
 
   if (error) {

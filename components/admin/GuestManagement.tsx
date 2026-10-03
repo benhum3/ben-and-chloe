@@ -7,18 +7,23 @@ type InvitationType = "day" | "evening";
 export type ManagedHousehold = {
   id: string;
   invitationName: string;
-  invitationType: InvitationType;
   guests: Array<{
     id: string;
     fullName: string;
+    invitationType: InvitationType;
     attending: boolean | null;
   }>;
+};
+
+type ImportGuest = {
+  fullName: string;
+  invitationType: InvitationType;
 };
 
 type ImportHousehold = {
   invitationName: string;
   invitationType: InvitationType;
-  guests: string[];
+  guests: ImportGuest[];
 };
 
 type Mode = "manual" | "upload" | "manage";
@@ -69,6 +74,15 @@ function normaliseHeader(value: string) {
     .replace(/[^a-z]/g, "");
 }
 
+function describeInvitationTypes(guests: ImportGuest[]) {
+  const invitationTypes = new Set(
+    guests.map((guest) => guest.invitationType),
+  );
+
+  if (invitationTypes.size > 1) return "day & evening";
+  return guests[0]?.invitationType ?? "day";
+}
+
 function buildImportPreview(text: string) {
   const rows = parseCsv(text);
 
@@ -101,27 +115,29 @@ function buildImportPreview(text: string) {
     const key = invitationName.toLowerCase();
     const existing = grouped.get(key);
 
-    if (existing && existing.invitationType !== rawType) {
-      throw new Error(
-        `The invitation type is inconsistent for ${invitationName}.`,
-      );
-    }
-
     if (existing) {
       if (
         existing.guests.some(
-          (guest) => guest.toLowerCase() === guestName.toLowerCase(),
+          (guest) => guest.fullName.toLowerCase() === guestName.toLowerCase(),
         )
       ) {
         throw new Error(`${guestName} is duplicated in ${invitationName}.`);
       }
 
-      existing.guests.push(guestName);
+      existing.guests.push({
+        fullName: guestName,
+        invitationType: rawType,
+      });
     } else {
       grouped.set(key, {
         invitationName,
         invitationType: rawType,
-        guests: [guestName],
+        guests: [
+          {
+            fullName: guestName,
+            invitationType: rawType,
+          },
+        ],
       });
     }
   });
@@ -133,7 +149,7 @@ function downloadTemplate() {
   const csv = [
     "Household,Invitation Type,Guest Name",
     '"John & Sarah Smith",Day,John Smith',
-    '"John & Sarah Smith",Day,Sarah Smith',
+    '"John & Sarah Smith",Evening,Sarah Smith',
     "David Jones,Evening,David Jones",
   ].join("\n");
   const blob = new Blob([`\uFEFF${csv}`], {
@@ -165,9 +181,13 @@ export default function GuestManagement({
   const [fileName, setFileName] = useState("");
   const [selectedId, setSelectedId] = useState("");
   const [editName, setEditName] = useState("");
-  const [editType, setEditType] = useState<InvitationType>("day");
   const [editGuests, setEditGuests] = useState<
-    Array<{ id?: string; fullName: string; attending: boolean | null }>
+    Array<{
+      id?: string;
+      fullName: string;
+      invitationType: InvitationType;
+      attending: boolean | null;
+    }>
   >([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -234,7 +254,10 @@ export default function GuestManagement({
       {
         invitationName: manualName.trim(),
         invitationType: manualType,
-        guests,
+        guests: guests.map((fullName) => ({
+          fullName,
+          invitationType: manualType,
+        })),
       },
     ]);
   }
@@ -290,11 +313,11 @@ export default function GuestManagement({
     }
 
     setEditName(household.invitationName);
-    setEditType(household.invitationType);
     setEditGuests(
       household.guests.map((guest) => ({
         id: guest.id,
         fullName: guest.fullName,
+        invitationType: guest.invitationType,
         attending: guest.attending,
       })),
     );
@@ -338,7 +361,6 @@ export default function GuestManagement({
         body: JSON.stringify({
           id: selectedId,
           invitationName: editName,
-          invitationType: editType,
           guests: editGuests,
         }),
       });
@@ -483,7 +505,7 @@ export default function GuestManagement({
 
             <label className="block">
               <span className="mb-2 block text-[10px] uppercase tracking-[0.24em] text-neutral-500">
-                Invitation type
+                Invitation type for these guests
               </span>
               <select
                 value={manualType}
@@ -560,11 +582,16 @@ export default function GuestManagement({
                       <div className="flex items-start justify-between gap-4">
                         <p className="font-serif text-xl">{household.invitationName}</p>
                         <span className="text-[9px] uppercase tracking-[0.2em] text-[var(--gold-text)]">
-                          {household.invitationType}
+                          {describeInvitationTypes(household.guests)}
                         </span>
                       </div>
                       <p className="mt-2 text-sm text-neutral-600">
-                        {household.guests.join(", ")}
+                        {household.guests
+                          .map(
+                            (guest) =>
+                              `${guest.fullName} (${guest.invitationType === "day" ? "Day" : "Evening"})`,
+                          )
+                          .join(", ")}
                       </p>
                     </article>
                   ))}
@@ -615,34 +642,30 @@ export default function GuestManagement({
               </select>
             </label>
             <p className="mt-4 text-sm leading-7 text-neutral-500">
-              Editing or removing a guest who has already replied may alter your RSVP totals.
+              Each person can have a different invitation type. Editing or
+              removing a guest who has already replied may alter your RSVP
+              totals.
             </p>
           </div>
 
           {selectedId ? (
             <form onSubmit={saveHousehold} className="space-y-5">
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div>
                 <input
                   value={editName}
                   onChange={(event) => setEditName(event.target.value)}
                   aria-label="Invitation name"
                   maxLength={160}
-                  className="border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
+                  className="w-full border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
                 />
-                <select
-                  value={editType}
-                  onChange={(event) => setEditType(event.target.value as InvitationType)}
-                  aria-label="Invitation type"
-                  className="border border-[#ded9cf] bg-[#f8f6f2] px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
-                >
-                  <option value="day">Day invitation</option>
-                  <option value="evening">Evening invitation</option>
-                </select>
               </div>
 
               <div className="space-y-3">
                 {editGuests.map((guest, index) => (
-                  <div key={guest.id ?? `new-${index}`} className="flex gap-3">
+                  <div
+                    key={guest.id ?? `new-${index}`}
+                    className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem_auto]"
+                  >
                     <input
                       value={guest.fullName}
                       onChange={(event) =>
@@ -656,8 +679,29 @@ export default function GuestManagement({
                       }
                       aria-label={`Guest ${index + 1} name`}
                       maxLength={160}
-                      className="min-w-0 flex-1 border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
+                      className="min-w-0 border border-[#ded9cf] bg-transparent px-5 py-4 text-sm outline-none transition focus:border-[#d2a641]"
                     />
+                    <select
+                      value={guest.invitationType}
+                      onChange={(event) =>
+                        setEditGuests((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? {
+                                  ...item,
+                                  invitationType: event.target
+                                    .value as InvitationType,
+                                }
+                              : item,
+                          ),
+                        )
+                      }
+                      aria-label={`Invitation type for ${guest.fullName || `guest ${index + 1}`}`}
+                      className="border border-[#ded9cf] bg-[#f8f6f2] px-4 py-4 text-sm outline-none transition focus:border-[#d2a641]"
+                    >
+                      <option value="day">Day guest</option>
+                      <option value="evening">Evening guest</option>
+                    </select>
                     <button
                       type="button"
                       disabled={editGuests.length === 1}
@@ -677,7 +721,12 @@ export default function GuestManagement({
                 onClick={() =>
                   setEditGuests((current) => [
                     ...current,
-                    { fullName: "", attending: null },
+                    {
+                      fullName: "",
+                      invitationType:
+                        current[0]?.invitationType ?? "day",
+                      attending: null,
+                    },
                   ])
                 }
                 className="border-b border-[#d2a641] pb-1 text-[10px] uppercase tracking-[0.22em] text-[var(--gold-text)]"
