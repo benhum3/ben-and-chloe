@@ -160,10 +160,19 @@ export default function PhotoGallery() {
         body.set("uploaderName", uploaderName.trim());
         body.set("caption", caption.trim());
 
-        const previewQuery =
-          new URLSearchParams(window.location.search).get("preview") === "photos"
-            ? "?preview=photos"
-            : "";
+        const pageParams = new URLSearchParams(window.location.search);
+        const uploadParams = new URLSearchParams();
+
+        if (pageParams.get("preview") === "photos") {
+          uploadParams.set("preview", "photos");
+        }
+
+        const uploadToken = pageParams.get("uploadToken");
+        if (uploadToken) uploadParams.set("uploadToken", uploadToken);
+
+        const previewQuery = uploadParams.size
+          ? `?${uploadParams.toString()}`
+          : "";
         const response = await fetch(`/api/photos${previewQuery}`, {
           method: "POST",
           body,

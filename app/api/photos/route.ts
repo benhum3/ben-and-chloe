@@ -20,11 +20,20 @@ const ALLOWED_TYPES = new Map([
 
 function uploadsAreOpen(request: Request) {
   const now = new Date();
+  const url = new URL(request.url);
   const localPreview =
     process.env.NODE_ENV !== "production" &&
-    new URL(request.url).searchParams.get("preview") === "photos";
+    url.searchParams.get("preview") === "photos";
+  const previewToken = process.env.PHOTO_PREVIEW_UPLOAD_TOKEN;
+  const authorisedPreview =
+    Boolean(previewToken) &&
+    url.searchParams.get("uploadToken") === previewToken;
 
-  return localPreview || (now >= PHOTO_WINDOW_START && now < PHOTO_WINDOW_END);
+  return (
+    localPreview ||
+    authorisedPreview ||
+    (now >= PHOTO_WINDOW_START && now < PHOTO_WINDOW_END)
+  );
 }
 
 export async function GET() {
