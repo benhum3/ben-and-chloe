@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import Container from "./Container";
 import Monogram from "./Monogram";
+import { isLocalPreviewHost } from "@/lib/local-preview";
 import { getWeddingPhase } from "@/lib/wedding-schedule";
 
 type PrimaryAction =
@@ -35,7 +36,9 @@ function subscribeToClock(onChange: () => void) {
 function getPrimaryAction(): PrimaryAction {
   const preview = new URLSearchParams(window.location.search).get("preview");
 
-  if (preview === "photos") return "photos";
+  if (preview === "photos" && isLocalPreviewHost(window.location.hostname)) {
+    return "photos";
+  }
   if (preview === "after") return "photos-after";
   if (preview === "final-week") return "final-week";
   if (preview === "rsvp-closed") return "none";

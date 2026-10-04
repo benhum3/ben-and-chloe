@@ -28,22 +28,10 @@ function uploadsAreOpen(request: Request) {
   const tokenPreview =
     Boolean(previewToken) &&
     url.searchParams.get("uploadToken") === previewToken;
-  let pagePreview = false;
-
-  try {
-    const referer = new URL(request.headers.get("referer") ?? "");
-    pagePreview =
-      url.searchParams.get("preview") === "photos" &&
-      referer.origin === url.origin &&
-      referer.pathname === "/preview=photos";
-  } catch {
-    pagePreview = false;
-  }
 
   return (
     localPreview ||
     tokenPreview ||
-    pagePreview ||
     (now >= PHOTO_WINDOW_START && now < PHOTO_WINDOW_END)
   );
 }

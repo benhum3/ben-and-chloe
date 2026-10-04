@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import { isLocalPreviewHost } from "@/lib/local-preview";
 import { PHOTO_FOCUS_START_AT } from "@/lib/wedding-schedule";
 import Container from "./Container";
 
@@ -56,7 +57,7 @@ function subscribeToClock(onChange: () => void) {
 function getPhotoPhase(): PhotoPhase {
   const preview = new URLSearchParams(window.location.search).get("preview");
 
-  if (preview === "photos") {
+  if (preview === "photos" && isLocalPreviewHost(window.location.hostname)) {
     return "open";
   }
 
@@ -175,7 +176,11 @@ export default function PhotoGallery({
         const pageParams = new URLSearchParams(window.location.search);
         const uploadParams = new URLSearchParams();
 
-        if (previewUploads || pageParams.get("preview") === "photos") {
+        if (
+          previewUploads ||
+          (pageParams.get("preview") === "photos" &&
+            isLocalPreviewHost(window.location.hostname))
+        ) {
           uploadParams.set("preview", "photos");
         }
 
@@ -221,9 +226,10 @@ export default function PhotoGallery({
   const galleryPhotos =
     phase === "open" &&
     (forceOpen ||
-      new URLSearchParams(
-        typeof window === "undefined" ? "" : window.location.search,
-      ).get("preview") === "photos") &&
+      (typeof window !== "undefined" &&
+        isLocalPreviewHost(window.location.hostname) &&
+        new URLSearchParams(window.location.search).get("preview") ===
+          "photos")) &&
     photos.length === 0
       ? previewPhotos
       : photos;
@@ -318,11 +324,7 @@ export default function PhotoGallery({
                   <div
                     id="share-photos"
                     ref={uploadPanelRef}
-                    className={`order-1 scroll-mt-28 border border-[#d2a641]/45 bg-[#211f1b] p-4 shadow-[0_20px_70px_rgba(0,0,0,0.32)] md:p-7 ${
-                      selectedPhotos.length > 0 || message || forceOpen
-                        ? "mt-7 block md:mt-10"
-                        : "mt-10 hidden sm:block md:mt-12"
-                    }`}
+                    className="order-1 mt-7 block scroll-mt-28 border border-[#d2a641]/45 bg-[#211f1b] p-4 shadow-[0_20px_70px_rgba(0,0,0,0.32)] md:mt-10 md:p-7"
                   >
                     <div className="mb-4 flex items-center justify-between gap-4">
                       <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--gold-text)]">

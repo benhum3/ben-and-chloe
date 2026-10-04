@@ -2,6 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 
+import { isLocalPreviewHost } from "@/lib/local-preview";
 import { getWeddingPhase, type WeddingPhase } from "@/lib/wedding-schedule";
 
 function subscribeToClock(onChange: () => void) {
@@ -20,7 +21,9 @@ function getCurrentPhase() {
     return preview;
   }
 
-  if (preview === "photos") return "wedding-day";
+  if (preview === "photos" && isLocalPreviewHost(window.location.hostname)) {
+    return "wedding-day";
+  }
 
   return getWeddingPhase(new Date());
 }
