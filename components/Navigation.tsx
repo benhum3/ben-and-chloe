@@ -5,11 +5,16 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import Container from "./Container";
 import Monogram from "./Monogram";
-import { isRsvpClosed } from "@/lib/wedding-schedule";
+import { getWeddingPhase } from "@/lib/wedding-schedule";
 
-type PrimaryAction = "rsvp" | "none" | "photos" | "photos-after";
+type PrimaryAction =
+  | "rsvp"
+  | "none"
+  | "final-week"
+  | "photos"
+  | "photos-after";
 
-const SECTION_IDS = ["day", "venue", "travel", "faq", "contact"];
+const SECTION_IDS = ["day", "venue", "details", "travel", "faq", "contact"];
 const MONOGRAM_REVEAL_DELAY = 40;
 
 function getMonogramRevealProgress(scrollY: number, viewportHeight: number) {
@@ -32,13 +37,15 @@ function getPrimaryAction(): PrimaryAction {
 
   if (preview === "photos") return "photos";
   if (preview === "after") return "photos-after";
-  if (preview === "final-week") return "none";
+  if (preview === "final-week") return "final-week";
+  if (preview === "rsvp-closed") return "none";
 
-  const now = new Date();
+  const phase = getWeddingPhase();
 
-  if (now >= new Date("2026-12-20T00:00:00Z")) return "photos-after";
-  if (now >= new Date("2026-12-19T00:00:00Z")) return "photos";
-  if (isRsvpClosed(now)) return "none";
+  if (phase === "after") return "photos-after";
+  if (phase === "wedding-day") return "photos";
+  if (phase === "final-week") return "final-week";
+  if (phase === "rsvp-closed") return "none";
   return "rsvp";
 }
 
@@ -151,16 +158,32 @@ export default function Navigation() {
     };
   }, [menuOpen]);
 
-  const links = [
+  const standardLinks = [
     ["The Day", "#day"],
     ["Our Celebration", "#venue"],
     ["Travel", "#travel"],
     ["FAQs", "#faq"],
     ["Contact", "#contact"],
   ];
+  const finalDetailsArePrimary = primaryAction === "final-week";
+  const usesExpandedNavigation =
+    primaryAction === "none" || finalDetailsArePrimary;
+  const links =
+    usesExpandedNavigation
+      ? [
+          ["The Day", "#day"],
+          ["Our Celebration", "#venue"],
+          ["Final Details", "#details"],
+          ["Travel", "#travel"],
+          ["FAQs", "#faq"],
+          ["Contact", "#contact"],
+        ]
+      : standardLinks;
   const photosArePrimary =
     primaryAction === "photos" || primaryAction === "photos-after";
-  const monogramReveal = photosArePrimary ? 1 : navReveal;
+  const monogramReveal =
+    photosArePrimary || finalDetailsArePrimary ? 1 : navReveal;
+  const monogramSlotProgress = monogramReveal;
   const navigationLinks = primaryAction === "photos-after"
     ? []
     : primaryAction === "photos"
@@ -200,7 +223,8 @@ export default function Navigation() {
           >
             <div
               id="nav-monogram-target"
-              className="relative aspect-[379/192] w-[4.75rem] shrink-0 sm:w-20"
+              className="relative h-10 shrink-0 overflow-hidden transition-[width] duration-500 ease-out"
+              style={{ width: `${monogramSlotProgress * 5}rem` }}
             >
               <a
                 href="#home"
@@ -226,7 +250,11 @@ export default function Navigation() {
               </a>
             </div>
 
-            <div className="hidden items-center gap-6 md:flex">
+            <div
+              className={`hidden flex-1 items-center justify-evenly gap-2 ${
+                usesExpandedNavigation ? "lg:flex" : "md:flex"
+              }`}
+            >
               {navigationLinks.map(([label, href]) => (
                 <a
                   key={label}
@@ -234,7 +262,7 @@ export default function Navigation() {
                   aria-current={
                     activeSection === href.slice(1) ? "location" : undefined
                   }
-                  className={`group relative rounded-sm text-[11px] uppercase tracking-[0.28em] transition focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] ${
+                  className={`group relative whitespace-nowrap rounded-sm text-[11px] uppercase tracking-[0.28em] transition focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] ${
                     activeSection === href.slice(1)
                       ? "text-[#181818]"
                       : "text-neutral-500 hover:text-[#181818]"
@@ -263,7 +291,7 @@ export default function Navigation() {
 
             {photosArePrimary && (
               <a
-                href="#photos"
+                href="#share-photos"
                 className="hidden rounded-full border border-[#d2a641] bg-[#d2a641] px-5 py-2 text-[11px] uppercase tracking-[0.28em] text-[#181818] transition-all duration-300 hover:bg-transparent hover:text-[var(--gold-text)] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] md:block"
               >
                 Share Photos
@@ -277,7 +305,9 @@ export default function Navigation() {
               aria-label="Open navigation menu"
               aria-expanded={menuOpen}
               aria-controls="mobile-navigation"
-              className="min-h-11 min-w-11 rounded-sm text-[11px] uppercase tracking-[0.28em] text-neutral-600 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[#d2a641] md:hidden"
+              className={`min-h-11 min-w-11 rounded-sm text-[11px] uppercase tracking-[0.28em] text-neutral-600 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-[#d2a641] ${
+                usesExpandedNavigation ? "lg:hidden" : "md:hidden"
+              }`}
             >
               Menu
             </button>
@@ -294,7 +324,9 @@ export default function Navigation() {
         aria-label="Navigation menu"
         aria-hidden={!menuOpen}
         inert={!menuOpen ? true : undefined}
-        className={`fixed inset-0 z-[60] bg-[#181818] text-[#f8f6f2] transition-all duration-500 md:hidden ${
+        className={`fixed inset-0 z-[60] bg-[#181818] text-[#f8f6f2] transition-all duration-500 ${
+          usesExpandedNavigation ? "lg:hidden" : "md:hidden"
+        } ${
           menuOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
@@ -354,9 +386,9 @@ export default function Navigation() {
               </a>
             ))}
 
-            {primaryAction !== "none" && (
+            {(primaryAction === "rsvp" || photosArePrimary) && (
               <a
-                href={photosArePrimary ? "#photos" : "/rsvp"}
+                href={photosArePrimary ? "#share-photos" : "/rsvp"}
                 data-rsvp-before-wedding={
                   primaryAction === "rsvp" ? true : undefined
                 }

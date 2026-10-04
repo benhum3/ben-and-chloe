@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 
 import { consumeRateLimit } from "@/lib/rate-limit";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { PHOTO_FOCUS_START_AT } from "@/lib/wedding-schedule";
 
 const BUCKET = "wedding-photos";
 const MAX_FILE_SIZE = 12 * 1024 * 1024;
 const MAX_NAME_LENGTH = 80;
 const MAX_CAPTION_LENGTH = 240;
-const PHOTO_WINDOW_START = new Date("2026-12-19T00:00:00Z");
+const PHOTO_WINDOW_START = new Date(PHOTO_FOCUS_START_AT);
 const PHOTO_WINDOW_END = new Date("2026-12-27T00:00:00Z");
 const ALLOWED_TYPES = new Map([
   ["image/jpeg", "jpg"],

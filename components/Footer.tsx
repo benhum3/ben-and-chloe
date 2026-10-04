@@ -50,6 +50,14 @@ export default function Footer() {
             </a>
 
             <a
+              href="#details"
+              data-post-rsvp-before-wedding
+              className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"
+            >
+              Final Details
+            </a>
+
+            <a
               href="#travel"
               data-wedding-day-practical
               className="transition duration-300 hover:text-[var(--gold-text)] focus-visible:outline-none focus-visible:text-[var(--gold-text)]"

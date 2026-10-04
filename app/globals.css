@@ -70,6 +70,23 @@ html[data-wedding-phase="after"] [data-wedding-day-practical] {
   display: none !important;
 }
 
+[data-post-rsvp-before-wedding] {
+  display: none !important;
+}
+
+html[data-wedding-phase="rsvp-closed"] [data-post-rsvp-before-wedding],
+html[data-wedding-phase="final-week"] [data-post-rsvp-before-wedding] {
+  display: inline-flex !important;
+}
+
+[data-post-rsvp-notice] {
+  display: none !important;
+}
+
+html[data-wedding-phase="rsvp-closed"] [data-post-rsvp-notice] {
+  display: inline-flex !important;
+}
+
 [data-photo-navigation] {
   display: none !important;
 }

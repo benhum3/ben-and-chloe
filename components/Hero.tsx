@@ -9,6 +9,18 @@ export default function Hero() {
       data-before-wedding-day
       className="flex min-h-screen flex-col items-center px-6 pb-16 pt-28 text-center md:justify-center md:py-28"
     >
+      <a
+        href="#details"
+        data-post-rsvp-notice
+        className="reveal-up delay-100 mb-8 min-h-11 items-center gap-4 border-y border-[#d2a641]/50 px-5 py-3 text-[9px] uppercase tracking-[0.25em] text-neutral-600 transition-colors duration-300 hover:text-[#181818] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 focus-visible:outline-[#d2a641] sm:text-[10px] md:mb-10"
+      >
+        <span>Online RSVPs are now closed</span>
+        <span aria-hidden="true" className="text-[var(--gold-text)]">
+          ·
+        </span>
+        <span className="text-[var(--gold-text)]">View final details ↓</span>
+      </a>
+
       <div className="reveal-up delay-100 -mb-2 origin-center scale-[0.82] sm:scale-90 md:mb-0 md:scale-100">
         <div className="mb-12 flex justify-center">
           <div

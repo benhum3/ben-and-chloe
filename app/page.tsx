@@ -10,6 +10,7 @@ import Contact from "@/components/Contact";
 import MobileRSVP from "@/components/MobileRSVP";
 import WeddingMode from "@/components/WeddingMode";
 import PhotoGallery from "@/components/PhotoGallery";
+import FinalDetails from "@/components/FinalDetails";
 
 export default function Home() {
   return (
@@ -21,11 +22,13 @@ export default function Home() {
         Skip to invitation
       </a>
       <Navigation />
+      <FinalDetails placement="featured" />
       <PhotoGallery />
       <WeddingMode />
       <Hero />
       <Day />
       <Venue />
+      <FinalDetails placement="inline" />
       <Travel />
       <FAQ />
       <Contact />

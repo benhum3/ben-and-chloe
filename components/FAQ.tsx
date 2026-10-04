@@ -33,6 +33,7 @@ const questions = [
   {
     question: "When should I respond by?",
     answer: `Please submit your RSVP by ${RSVP_DEADLINE}. You can return to the RSVP page later if you need to update your response.`,
+    beforeRsvp: true,
   },
 ];
 
@@ -73,6 +74,7 @@ export default function FAQ() {
               return (
                 <article
                   key={item.question}
+                  data-rsvp-before-wedding={item.beforeRsvp || undefined}
                   className="border-b border-white/15"
                 >
                   <button

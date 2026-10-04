@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
+import { PHOTO_FOCUS_START_AT } from "@/lib/wedding-schedule";
 import Container from "./Container";
 
 type PhotoPhase = "hidden" | "upcoming" | "open" | "gallery";
@@ -20,7 +21,7 @@ type SelectedPhoto = {
   previewUrl: string;
 };
 
-const PHOTO_WINDOW_START = new Date("2026-12-19T00:00:00Z");
+const PHOTO_WINDOW_START = new Date(PHOTO_FOCUS_START_AT);
 const PHOTO_WINDOW_END = new Date("2026-12-27T00:00:00Z");
 const PHOTO_TEASER_START = new Date("2026-12-12T00:00:00Z");
 const MAX_SELECTION = 10;
@@ -48,9 +49,13 @@ function subscribeToClock(onChange: () => void) {
 }
 
 function getPhotoPhase(): PhotoPhase {
-  if (new URLSearchParams(window.location.search).get("preview") === "photos") {
+  const preview = new URLSearchParams(window.location.search).get("preview");
+
+  if (preview === "photos") {
     return "open";
   }
+
+  if (preview === "final-week") return "upcoming";
 
   const now = new Date();
 
@@ -72,6 +77,7 @@ export default function PhotoGallery() {
   );
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const libraryInputRef = useRef<HTMLInputElement>(null);
+  const uploadPanelRef = useRef<HTMLDivElement>(null);
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [selectedPhotos, setSelectedPhotos] = useState<SelectedPhoto[]>([]);
   const [uploaderName, setUploaderName] = useState("");
@@ -125,6 +131,13 @@ export default function PhotoGallery() {
 
     setSelectedPhotos((current) => [...current, ...nextFiles]);
     setMessage("");
+
+    window.setTimeout(() => {
+      uploadPanelRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
   }
 
   function removeSelectedPhoto(previewUrl: string) {
@@ -197,55 +210,50 @@ export default function PhotoGallery() {
     <section
       id="photos"
       data-gold-theme="dark"
-      className="scroll-mt-28 bg-[#181818] pb-20 pt-32 text-[#f8f6f2] md:pb-28 md:pt-40"
+      className="scroll-mt-28 bg-[#181818] pb-28 pt-28 text-[#f8f6f2] md:pb-28 md:pt-36"
     >
       <Container>
-        <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+        <div
+          className={
+            phase === "upcoming"
+              ? "grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20"
+              : ""
+          }
+        >
           <div>
             <p className="text-[10px] uppercase tracking-[0.35em] text-[var(--gold-text)] md:text-[11px]">
-              Through your eyes
+              {phase === "upcoming" ? "Through your eyes" : "The wedding gallery"}
             </p>
-            <h2 className="mt-4 font-serif text-4xl leading-[1.05] md:mt-6 md:text-7xl">
-              Share your photos
-            </h2>
-            <p className="mt-6 max-w-md text-base leading-8 text-neutral-400 md:mt-8 md:text-sm">
-              Capture a favourite moment or choose photographs from your phone.
-              Photos are added straight to the shared gallery for everyone to
-              enjoy.
+            {phase === "upcoming" ? (
+              <h2 className="mt-4 font-serif text-4xl leading-[1.05] md:mt-6 md:text-7xl">
+                Share your photos
+              </h2>
+            ) : (
+              <h1 className="mt-4 max-w-4xl font-serif text-5xl leading-[0.98] md:mt-6 md:text-8xl">
+                The day, through your eyes
+              </h1>
+            )}
+            <p className="mt-6 max-w-2xl text-base leading-8 text-neutral-400 md:mt-8 md:text-sm">
+              {phase === "upcoming"
+                ? "On the day, you’ll be able to take a photograph or choose favourites from your phone for everyone to enjoy."
+                : "See the celebration as it unfolds. Take a photograph or choose a favourite from your phone and it will appear here for everyone to enjoy."}
             </p>
           </div>
 
           {phase === "upcoming" ? (
             <div className="border-t border-white/15 pt-7">
               <p className="font-serif text-3xl md:text-4xl">
-                Photo sharing opens on the wedding day.
+                Photo sharing opens at 1:00pm on the wedding day.
               </p>
               <p className="mt-4 text-sm leading-7 text-neutral-400">
-                Come back from 19 December to take a photo, upload your
-                favourites and enjoy the shared gallery.
+                Come back from 1:00pm on 19 December to take a photo, upload
+                your favourites and enjoy the shared gallery.
               </p>
             </div>
           ) : (
-            <div>
+            <div className="flex flex-col">
               {phase === "open" && (
-                <div className="border border-white/15 bg-white/[0.03] p-5 md:p-7">
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <button
-                      type="button"
-                      onClick={() => cameraInputRef.current?.click()}
-                      className="min-h-12 flex-1 rounded-full border border-[#d2a641] bg-[#d2a641] px-6 py-3 text-[10px] uppercase tracking-[0.26em] text-[#181818] transition hover:bg-transparent hover:text-[var(--gold-text)]"
-                    >
-                      Take a photo
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => libraryInputRef.current?.click()}
-                      className="min-h-12 flex-1 rounded-full border border-[#d2a641] px-6 py-3 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition hover:bg-[#d2a641] hover:text-[#181818]"
-                    >
-                      Choose photos
-                    </button>
-                  </div>
-
+                <>
                   <input
                     ref={cameraInputRef}
                     type="file"
@@ -268,6 +276,40 @@ export default function PhotoGallery() {
                       event.target.value = "";
                     }}
                   />
+
+                  <div
+                    id="share-photos"
+                    ref={uploadPanelRef}
+                    className={`order-2 scroll-mt-28 border border-white/15 bg-white/[0.03] p-5 md:p-7 ${
+                      selectedPhotos.length > 0 || message
+                        ? "mt-12 block md:mt-16"
+                        : "mt-12 hidden sm:block md:mt-16"
+                    }`}
+                  >
+                  <div className="mb-5 flex items-center justify-between gap-4">
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--gold-text)]">
+                      Add to the gallery
+                    </p>
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-neutral-500">
+                      Up to {MAX_SELECTION} photos
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="min-h-12 flex-1 rounded-full border border-[#d2a641] bg-[#d2a641] px-6 py-3 text-[10px] uppercase tracking-[0.26em] text-[#181818] transition hover:bg-transparent hover:text-[var(--gold-text)]"
+                    >
+                      Take a photo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => libraryInputRef.current?.click()}
+                      className="min-h-12 flex-1 rounded-full border border-[#d2a641] px-6 py-3 text-[10px] uppercase tracking-[0.26em] text-[var(--gold-text)] transition hover:bg-[#d2a641] hover:text-[#181818]"
+                    >
+                      Choose photos
+                    </button>
+                  </div>
 
                   {selectedPhotos.length > 0 && (
                     <div className="mt-7">
@@ -338,10 +380,11 @@ export default function PhotoGallery() {
                       {message}
                     </p>
                   )}
-                </div>
+                  </div>
+                </>
               )}
 
-              <div className={phase === "open" ? "mt-12" : ""}>
+              <div className="order-1 mt-10 md:mt-12">
                 <div className="flex items-end justify-between gap-5">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--gold-text)]">
@@ -367,20 +410,28 @@ export default function PhotoGallery() {
                     </p>
                   </div>
                 ) : (
-                  <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3">
-                    {galleryPhotos.map((photo) => (
+                  <div className="mt-7 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
+                    {galleryPhotos.map((photo, index) => (
                       <button
                         key={photo.id}
                         type="button"
                         onClick={() => setActivePhoto(photo)}
-                        className="group relative aspect-square overflow-hidden bg-neutral-800 text-left"
+                        className={`group relative overflow-hidden bg-neutral-800 text-left ${
+                          index === 0
+                            ? "col-span-2 aspect-[16/10] md:aspect-[16/9]"
+                            : "aspect-square"
+                        }`}
                       >
                         <Image
                           src={photo.url}
                           alt={photo.caption || "Wedding photograph"}
                           fill
                           unoptimized
-                          sizes="(min-width: 768px) 25vw, 50vw"
+                          sizes={
+                            index === 0
+                              ? "(min-width: 1152px) 50vw, 100vw"
+                              : "(min-width: 1152px) 25vw, (min-width: 768px) 33vw, 50vw"
+                          }
                           className="object-cover transition duration-500 group-hover:scale-[1.03]"
                         />
                         {(photo.caption || photo.uploaderName) && (
@@ -397,6 +448,28 @@ export default function PhotoGallery() {
           )}
         </div>
       </Container>
+
+      {phase === "open" &&
+        selectedPhotos.length === 0 &&
+        !message &&
+        !activePhoto && (
+          <div className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 grid grid-cols-2 gap-2 rounded-[1.75rem] border border-white/15 bg-[#181818]/95 p-2 shadow-2xl backdrop-blur-md sm:hidden">
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              className="min-h-12 rounded-full bg-[#d2a641] px-4 text-[9px] uppercase tracking-[0.22em] text-[#181818]"
+            >
+              Take a photo
+            </button>
+            <button
+              type="button"
+              onClick={() => libraryInputRef.current?.click()}
+              className="min-h-12 rounded-full border border-[#d2a641] px-4 text-[9px] uppercase tracking-[0.22em] text-[var(--gold-text)]"
+            >
+              Choose photos
+            </button>
+          </div>
+        )}
 
       {activePhoto && (
         <div
