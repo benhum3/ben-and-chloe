@@ -21,6 +21,11 @@ type SelectedPhoto = {
   previewUrl: string;
 };
 
+type PhotoGalleryProps = {
+  forceOpen?: boolean;
+  previewUploads?: boolean;
+};
+
 const PHOTO_WINDOW_START = new Date(PHOTO_FOCUS_START_AT);
 const PHOTO_WINDOW_END = new Date("2026-12-27T00:00:00Z");
 const PHOTO_TEASER_START = new Date("2026-12-12T00:00:00Z");
@@ -69,11 +74,18 @@ function getServerPhotoPhase(): PhotoPhase {
   return "hidden";
 }
 
-export default function PhotoGallery() {
+function getOpenPhotoPhase(): PhotoPhase {
+  return "open";
+}
+
+export default function PhotoGallery({
+  forceOpen = false,
+  previewUploads = false,
+}: PhotoGalleryProps = {}) {
   const phase = useSyncExternalStore(
     subscribeToClock,
-    getPhotoPhase,
-    getServerPhotoPhase,
+    forceOpen ? getOpenPhotoPhase : getPhotoPhase,
+    forceOpen ? getOpenPhotoPhase : getServerPhotoPhase,
   );
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const libraryInputRef = useRef<HTMLInputElement>(null);
@@ -163,7 +175,7 @@ export default function PhotoGallery() {
         const pageParams = new URLSearchParams(window.location.search);
         const uploadParams = new URLSearchParams();
 
-        if (pageParams.get("preview") === "photos") {
+        if (previewUploads || pageParams.get("preview") === "photos") {
           uploadParams.set("preview", "photos");
         }
 
@@ -208,9 +220,10 @@ export default function PhotoGallery() {
 
   const galleryPhotos =
     phase === "open" &&
-    new URLSearchParams(
-      typeof window === "undefined" ? "" : window.location.search,
-    ).get("preview") === "photos" &&
+    (forceOpen ||
+      new URLSearchParams(
+        typeof window === "undefined" ? "" : window.location.search,
+      ).get("preview") === "photos") &&
     photos.length === 0
       ? previewPhotos
       : photos;

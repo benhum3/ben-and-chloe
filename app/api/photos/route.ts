@@ -25,13 +25,25 @@ function uploadsAreOpen(request: Request) {
     process.env.NODE_ENV !== "production" &&
     url.searchParams.get("preview") === "photos";
   const previewToken = process.env.PHOTO_PREVIEW_UPLOAD_TOKEN;
-  const authorisedPreview =
+  const tokenPreview =
     Boolean(previewToken) &&
     url.searchParams.get("uploadToken") === previewToken;
+  let pagePreview = false;
+
+  try {
+    const referer = new URL(request.headers.get("referer") ?? "");
+    pagePreview =
+      url.searchParams.get("preview") === "photos" &&
+      referer.origin === url.origin &&
+      referer.pathname === "/preview=photos";
+  } catch {
+    pagePreview = false;
+  }
 
   return (
     localPreview ||
-    authorisedPreview ||
+    tokenPreview ||
+    pagePreview ||
     (now >= PHOTO_WINDOW_START && now < PHOTO_WINDOW_END)
   );
 }
