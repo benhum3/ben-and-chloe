@@ -61,6 +61,7 @@ function getPhotoPhase(): PhotoPhase {
     return "open";
   }
 
+  if (preview === "after") return "gallery";
   if (preview === "final-week") return "upcoming";
 
   const now = new Date();
@@ -250,39 +251,41 @@ export default function PhotoGallery({
               : ""
           }
         >
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.35em] text-[var(--gold-text)] md:text-[11px]">
-              {phase === "upcoming"
-                ? "Through your eyes"
-                : forceOpen
-                  ? "Benjamin & Chloe · Wedding photos"
-                  : "The wedding gallery"}
-            </p>
-            {phase === "upcoming" ? (
-              <h2 className="mt-4 font-serif text-4xl leading-[1.05] md:mt-6 md:text-7xl">
-                Share your photos
-              </h2>
-            ) : (
-              <h1
-                className={`mt-4 max-w-4xl font-serif leading-[0.98] md:mt-6 ${
-                  forceOpen ? "text-4xl md:text-6xl" : "text-5xl md:text-8xl"
+          {phase !== "gallery" && (
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.35em] text-[var(--gold-text)] md:text-[11px]">
+                {phase === "upcoming"
+                  ? "Through your eyes"
+                  : forceOpen
+                    ? "Benjamin & Chloe · Wedding photos"
+                    : "The wedding gallery"}
+              </p>
+              {phase === "upcoming" ? (
+                <h2 className="mt-4 font-serif text-4xl leading-[1.05] md:mt-6 md:text-7xl">
+                  Share your photos
+                </h2>
+              ) : (
+                <h1
+                  className={`mt-4 max-w-4xl font-serif leading-[0.98] md:mt-6 ${
+                    forceOpen ? "text-4xl md:text-6xl" : "text-5xl md:text-8xl"
+                  }`}
+                >
+                  {forceOpen ? "Share the moment" : "The day, through your eyes"}
+                </h1>
+              )}
+              <p
+                className={`max-w-2xl text-base leading-7 text-neutral-400 md:text-sm ${
+                  forceOpen ? "mt-3" : "mt-6 md:mt-8"
                 }`}
               >
-                {forceOpen ? "Share the moment" : "The day, through your eyes"}
-              </h1>
-            )}
-            <p
-              className={`max-w-2xl text-base leading-7 text-neutral-400 md:text-sm ${
-                forceOpen ? "mt-3" : "mt-6 md:mt-8"
-              }`}
-            >
-              {phase === "upcoming"
-                ? "On the day, you’ll be able to take a photograph or choose favourites from your phone for everyone to enjoy."
-                : forceOpen
-                  ? "Take a photo now or pick one from your phone. You can check it before sharing it with everyone."
-                  : "See the celebration as it unfolds. Take a photograph or choose a favourite from your phone and it will appear here for everyone to enjoy."}
-            </p>
-          </div>
+                {phase === "upcoming"
+                  ? "On the day, you’ll be able to take a photograph or choose favourites from your phone for everyone to enjoy."
+                  : forceOpen
+                    ? "Take a photo now or pick one from your phone. You can check it before sharing it with everyone."
+                    : "See the celebration as it unfolds. Take a photograph or choose a favourite from your phone and it will appear here for everyone to enjoy."}
+              </p>
+            </div>
+          )}
 
           {phase === "upcoming" ? (
             <div className="border-t border-white/15 pt-7">
@@ -442,7 +445,11 @@ export default function PhotoGallery({
                 </>
               )}
 
-              <div className="order-2 mt-12 md:mt-16">
+              <div
+                className={`order-2 ${
+                  phase === "gallery" ? "" : "mt-12 md:mt-16"
+                }`}
+              >
                 <div className="flex items-end justify-between gap-5">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.3em] text-[var(--gold-text)]">

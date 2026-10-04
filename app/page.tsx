@@ -23,8 +23,8 @@ export default function Home() {
       </a>
       <Navigation />
       <FinalDetails placement="featured" />
-      <PhotoGallery />
       <WeddingMode />
+      <PhotoGallery />
       <Hero />
       <Day />
       <Venue />
