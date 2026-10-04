@@ -1,19 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 
 const siteUrl = "https://www.humphreywedding.co.uk";
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -64,9 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-GB" data-scroll-behavior="smooth">
-      <body className={`${cormorant.variable} ${inter.variable}`}>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

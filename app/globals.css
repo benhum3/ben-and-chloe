@@ -7,6 +7,9 @@
   --gold-text: #8a681e;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-sans: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-serif: Didot, "Didot LT STD", "Bodoni 72", "Bodoni MT", Georgia,
+    serif;
 }
 
 [data-gold-theme="dark"] {
