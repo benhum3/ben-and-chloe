@@ -505,28 +505,6 @@ export default function PhotoGallery({
         </div>
       </Container>
 
-      {phase === "open" &&
-        selectedPhotos.length === 0 &&
-        !message &&
-        !activePhoto && (
-          <div className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 grid grid-cols-2 gap-2 rounded-[1.75rem] border border-white/15 bg-[#181818]/95 p-2 shadow-2xl backdrop-blur-md sm:hidden">
-            <button
-              type="button"
-              onClick={() => cameraInputRef.current?.click()}
-              className="col-span-2 min-h-14 rounded-full bg-[#d2a641] px-5 text-xs uppercase tracking-[0.22em] text-[#181818] shadow-[0_8px_24px_rgba(210,166,65,0.22)]"
-            >
-              Take a photo
-            </button>
-            <button
-              type="button"
-              onClick={() => libraryInputRef.current?.click()}
-              className="col-span-2 min-h-10 rounded-full px-4 text-[9px] uppercase tracking-[0.2em] text-neutral-400"
-            >
-              Or choose from your phone
-            </button>
-          </div>
-        )}
-
       {activePhoto && (
         <div
           role="dialog"
